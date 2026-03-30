@@ -26,7 +26,7 @@
 #include "sdl-util.h"
 
 #include <string>
-#include <SDL3/SDL_rwops.h>
+#include <SDL3/SDL_iostream.h>
 
 struct ALDataSource;
 
