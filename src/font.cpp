@@ -146,7 +146,8 @@ _TTF_Font *SharedFontState::getFont(std::string family,
 		const char *path = !req.regular.empty()
 		                 ? req.regular.c_str() : req.other.c_str();
 
-		ops = SDL_OpenIO();
+		//ops = SDL_OpenIO();
+		SDL_IOStream ops;
 		shState->fileSystem().openReadRaw(*ops, path, true);
 	}
 
