@@ -88,7 +88,7 @@ SharedFontState::~SharedFontState()
 	delete p;
 }
 
-void SharedFontState::initFontSetCB(SDL_RWops &ops,
+void SharedFontState::initFontSetCB(SDL_IOStream &ops,
                                     const std::string &filename)
 {
 	TTF_Font *font = TTF_OpenFontRW(&ops, 0, 0);
@@ -96,8 +96,8 @@ void SharedFontState::initFontSetCB(SDL_RWops &ops,
 	if (!font)
 		return;
 
-	std::string family = TTF_FontFaceFamilyName(font);
-	std::string style = TTF_FontFaceStyleName(font);
+	std::string family = TTF_GetFontFamilyName(font);
+	std::string style = TTF_GetFontStyleName(font);
 
 	TTF_CloseFont(font);
 
@@ -133,7 +133,7 @@ _TTF_Font *SharedFontState::getFont(std::string family,
 		return font;
 
 	/* Not in pool; open new handle */
-	SDL_RWops *ops;
+	SDL_IOStream *ops;
 
 	if (family.empty())
 	{
@@ -146,7 +146,7 @@ _TTF_Font *SharedFontState::getFont(std::string family,
 		const char *path = !req.regular.empty()
 		                 ? req.regular.c_str() : req.other.c_str();
 
-		ops = SDL_AllocRW();
+		ops = SDL_OpenIO();
 		shState->fileSystem().openReadRaw(*ops, path, true);
 	}
 

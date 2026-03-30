@@ -25,7 +25,7 @@
 #include "gl-fun.h"
 #include "config.h"
 
-#include <SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 
 static void applyBool(GLenum state, bool mode)
 {

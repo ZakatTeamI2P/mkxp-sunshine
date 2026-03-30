@@ -51,7 +51,7 @@ void subRectImageUpload(GLint srcW, GLint srcX, GLint srcY,
 
 		TEX::uploadSubImage(dstX, dstY, dstW, dstH, tmp->pixels, format);
 
-		SDL_FreeSurface(tmp);
+		SDL_DestroySurface(tmp);
 	}
 }
 

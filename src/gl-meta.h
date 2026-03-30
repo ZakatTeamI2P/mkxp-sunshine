@@ -26,7 +26,7 @@
 #include "gl-util.h"
 #include "vertex.h"
 
-#include <SDL_surface.h>
+#include <SDL3/SDL_surface.h>
 
 namespace GLMeta
 {

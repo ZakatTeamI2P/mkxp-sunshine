@@ -39,9 +39,9 @@
 #include "debugwriter.h"
 #include "oneshot.h"
 
-#include <SDL_video.h>
-#include <SDL_timer.h>
-#include <SDL_image.h>
+#include <SDL3/SDL_video.h>
+#include <SDL3/SDL_timer.h>
+#include <SDL3_image/SDL_image.h>
 
 #include <time.h>
 #ifndef _MSC_VER
