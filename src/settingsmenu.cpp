@@ -477,19 +477,17 @@ struct SettingsMenuPrivate
 			TTF_SetFontStyle(font, TTF_STYLE_NORMAL);
 	}
 
-	SDL_Surface *createTextSurface(const char *str, bool bold)
-	{
-		SDL_Color c = { cText, cText, cText, 255 };
+	SDL_Surface *createTextSurface(const char *str, bool bold){
+		//SDL_Color c = { cText, cText, cText, 255 };
 		applyFontStyle(bold);
 
-		return TTF_RenderText_Blended(font, str, c);
+		return TTF_RenderText_Blended(font, str, strlen(str), c);
 	}
 
-	SDL_Surface *createTextSurface(const char *str, SDL_Color c,
-	                               bool bold)
+	SDL_Surface *createTextSurface(const char *str, SDL_Color c, bool bold)
 	{
 		applyFontStyle(bold);
-		return TTF_RenderText_Blended(font, str, c);
+		return TTF_RenderText_Blended(font, str, strlen(str), c);
 	}
 
 	/* Horizontally centered */
@@ -1222,11 +1220,10 @@ bool SettingsMenu::onEvent(const SDL_Event &event,
 	case SDL_EVENT_KEY_DOWN:
 		if (p->state != AwaitingInput)
 		{
-			if (event.key.sym == SDLK_RETURN)
+			if (event.key.key == SDLK_RETURN)
 				p->onAccept();
-			else if (event.key.sym == SDLK_ESCAPE)
+			else if (event.key.key == SDLK_ESCAPE)
 				p->onCancel();
-
 			return true;
 		}
 
