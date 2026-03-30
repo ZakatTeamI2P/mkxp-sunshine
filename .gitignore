@@ -53,3 +53,5 @@ oclint/
 
 steamworks/
 build/
+
+.vscode
