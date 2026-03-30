@@ -352,9 +352,9 @@ void EventThread::process(RGSSThreadData &rtData)
 			}
 
 			if (rtData.acceptingTextInput) {
-				if (event.key.sym == SDLK_BACKSPACE && rtData.inputText.length() > 0)
+				if (event.key.key == SDLK_BACKSPACE && rtData.inputText.length() > 0)
 					rtData.inputText.pop_back();
-				else if (event.key.sym == SDLK_RETURN)
+				else if (event.key.key == SDLK_RETURN)
 					rtData.acceptingTextInput.clear();
 
 				break;

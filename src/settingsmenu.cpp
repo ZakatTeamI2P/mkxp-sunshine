@@ -400,7 +400,7 @@ struct SettingsMenuPrivate
 	}
 
 	void fillSurface(SDL_Surface *surf, uint8_t grey){
-		SDL_FillSurfaceRect(surf, 0, SDL_MapRGBA(rgb, grey, grey, grey, 255));
+		SDL_FillSurfaceRect(surf, 0, SDL_MapSurfaceRGBA(surf, grey, grey, grey, 255));
 	}
 
 	void fillRect(SDL_Surface *surf,
@@ -408,7 +408,7 @@ struct SettingsMenuPrivate
 	              uint8_t r, uint8_t g, uint8_t b)
 	{
 		SDL_Rect rect = { drawOff.x+x, drawOff.y+y, w, h };
-		SDL_FillSurfaceRect(surf, &rect, SDL_MapRGB(rgb, r, g, b));
+		SDL_FillSurfaceRect(surf, &rect, SDL_MapSurfaceRGB(surf, r, g, b));
 	}
 
 	void fillRect(SDL_Surface *surf, uint8_t grey,
@@ -1077,7 +1077,7 @@ SettingsMenu::SettingsMenu(RGSSThreadData &rtData)
 	p->font = shState->fontState().getFont(getFontName(), getFontSize());
 
 
-	p->rgb = p->winSurf->format;
+	*p->rgb = p->winSurf->format;
 
 	const size_t layoutW = 2;
 	const size_t layoutH = 6;

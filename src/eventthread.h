@@ -37,8 +37,10 @@
 
 #include <stdint.h>
 
+#include <alc.h>
+//typedef struct ALCdevice_struct ALCdevice;
+
 struct RGSSThreadData;
-typedef struct ALCdevice_struct ALCdevice;
 struct SDL_Window;
 union SDL_Event;
 
