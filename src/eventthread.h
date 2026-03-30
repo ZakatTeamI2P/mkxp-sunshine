@@ -29,7 +29,7 @@
 
 #include <SDL3/SDL_scancode.h>
 #include <SDL3/SDL_joystick.h>
-#include <SDL3/SDL_gamecontroller.h>
+#include <SDL3/SDL_gamepad.h>
 #include <SDL3/SDL_mouse.h>
 #include <SDL3/SDL_mutex.h>
 
