@@ -21,11 +21,11 @@
 
 #include "bitmap.h"
 
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_ttf.h>
-#include <SDL_rect.h>
-#include <SDL_surface.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
+#include <SDL3/SDL_rect.h>
+#include <SDL3/SDL_surface.h>
 
 #include <pixman.h>
 
@@ -107,7 +107,7 @@ struct BitmapPrivate
 	      megaSurface(0),
 	      surface(0)
 	{
-		format = SDL_AllocFormat(SDL_PIXELFORMAT_ABGR8888);
+		format = SDL_GetPixelFormatDetails(SDL_PIXELFORMAT_ABGR8888);
 
 		font = &shState->defaultFont();
 		pixman_region_init(&tainted);
@@ -115,7 +115,7 @@ struct BitmapPrivate
 
 	~BitmapPrivate()
 	{
-		SDL_FreeFormat(format);
+		SDL_DestroyFormat(format);
 		pixman_region_fini(&tainted);
 	}
 
@@ -216,8 +216,8 @@ struct BitmapPrivate
 		if (surf->format->format == format)
 			return;
 
-		SDL_Surface *surfConv = SDL_ConvertSurfaceFormat(surf, format, 0);
-		SDL_FreeSurface(surf);
+		SDL_Surface *surfConv = SDL_ConvertSurface(surf, format, 0);
+		SDL_DestroySurface(surf);
 		surf = surfConv;
 	}
 
@@ -225,7 +225,7 @@ struct BitmapPrivate
 	{
 		if (surface && freeSurface)
 		{
-			SDL_FreeSurface(surface);
+			SDL_DestroySurface(surface);
 			surface = 0;
 		}
 
@@ -241,7 +241,7 @@ struct BitmapOpenHandler : FileSystem::OpenHandler
 	    : surf(0)
 	{}
 
-	bool tryRead(SDL_RWops &ops, const char *ext)
+	bool tryRead(SDL_IOStream &ops, const char *ext)
 	{
 		surf = IMG_LoadTyped_RW(&ops, 1, ext);
 		return surf != 0;
@@ -288,7 +288,7 @@ Bitmap::Bitmap(const char *filename)
 		TEX::bind(p->gl.tex);
 		TEX::uploadImage(p->gl.width, p->gl.height, imgSurf->pixels, GL_RGBA);
 
-		SDL_FreeSurface(imgSurf);
+		SDL_DestroySurface(imgSurf);
 	}
 
 	p->addTaintedArea(rect());
@@ -434,12 +434,12 @@ void Bitmap::stretchBlt(const IntRect &destRect,
 		SDL_Rect btmRect = { 0, 0, width(), height() };
 		SDL_Rect bltRect;
 
-		if (SDL_IntersectRect(&btmRect, &dstRect, &bltRect) != SDL_TRUE)
+		if (SDL_GetRectIntersection(&btmRect, &dstRect, &bltRect) != SDL_TRUE)
 			return;
 
 		int bpp;
 		Uint32 rMask, gMask, bMask, aMask;
-		SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_ABGR8888,
+		SDL_GetMasksForPixelFormat(SDL_PIXELFORMAT_ABGR8888,
 		                           &bpp, &rMask, &gMask, &bMask, &aMask);
 		SDL_Surface *blitTemp =
 			SDL_CreateRGBSurface(0, destRect.w, destRect.h, bpp, rMask, gMask, bMask, aMask);
@@ -463,7 +463,7 @@ void Bitmap::stretchBlt(const IntRect &destRect,
 			GLMeta::subRectImageEnd();
 		}
 
-		SDL_FreeSurface(blitTemp);
+		SDL_DestroySurface(blitTemp);
 
 		p->onModified();
 		return;
@@ -831,7 +831,8 @@ void Bitmap::setPixel(int x, int y, const Color &color)
 	if (p->surface)
 	{
 		uint32_t &surfPixel = getPixelAt(p->surface, p->format, x, y);
-		surfPixel = SDL_MapRGBA(p->format, pixel[0], pixel[1], pixel[2], pixel[3]);
+		//  pixel = SDL_MapSurfaceRGBA(surface, r, g, b, a);
+		surfPixel = SDL_MapSurfaceRGBA(p, pixel[0], pixel[1], pixel[2], pixel[3]);
 	}
 
 	p->onModified(false);
@@ -899,8 +900,9 @@ static std::string fixupString(const char *str)
 
 static void applyShadow(SDL_Surface *&in, const SDL_PixelFormat &fm, const SDL_Color &c)
 {
-	SDL_Surface *out = SDL_CreateRGBSurface
-		(0, in->w+1, in->h+1, fm.BitsPerPixel, fm.Rmask, fm.Gmask, fm.Bmask, fm.Amask);
+	//SDL_CreateSurface(32, 32, SDL_PIXELFORMAT_INDEX8);
+	// SDL_Surface *out = SDL_CreateRGBSurface(0, in->w+1, in->h+1, fm.BitsPerPixel, fm.Rmask, fm.Gmask, fm.Bmask, fm.Amask);
+	SDL_Surface *out = SDL_CreateRGBSurface(in->w+1, in->h+1, fm.Rmask, fm.Gmask, fm.Bmask, fm.Amask);
 
 	float fr = c.r / 255.0f;
 	float fg = c.g / 255.0f;
@@ -980,7 +982,7 @@ static void applyShadow(SDL_Surface *&in, const SDL_PixelFormat &fm, const SDL_C
 		}
 
 	/* Store new surface in the input pointer */
-	SDL_FreeSurface(in);
+	SDL_DestroySurface(in);
 	in = out;
 }
 
@@ -1041,7 +1043,7 @@ void Bitmap::drawText(const IntRect &rect, const char *str, int align)
 
 		SDL_SetSurfaceBlendMode(txtSurf, SDL_BLENDMODE_BLEND);
 		SDL_BlitSurface(txtSurf, NULL, outline, &outRect);
-		SDL_FreeSurface(txtSurf);
+		SDL_DestroySurface(txtSurf);
 		txtSurf = outline;
 		/* reset outline to 0 */
 		TTF_SetFontOutline(font, 0);
@@ -1195,7 +1197,7 @@ void Bitmap::drawText(const IntRect &rect, const char *str, int align)
 		p->popViewport();
 	}
 
-	SDL_FreeSurface(txtSurf);
+	SDL_DestroySurface(txtSurf);
 	p->addTaintedArea(posRect);
 
 	p->onModified();
@@ -1314,7 +1316,7 @@ void Bitmap::taintArea(const IntRect &rect)
 void Bitmap::releaseResources()
 {
 	if (p->megaSurface)
-		SDL_FreeSurface(p->megaSurface);
+		SDL_DestroySurface(p->megaSurface);
 	else
 		shState->texPool().release(p->gl);
 
