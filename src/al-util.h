@@ -23,7 +23,7 @@
 #define ALUTIL_H
 
 #include <al.h>
-#include <SDL_audio.h>
+#include <SDL3/SDL_audio.h>
 #include <assert.h>
 
 namespace AL
@@ -196,15 +196,16 @@ inline uint8_t formatSampleSize(int sdlFormat)
 {
 	switch (sdlFormat)
 	{
-	case AUDIO_U8 :
-	case AUDIO_S8 :
+	case SDL_AUDIO_U8 :
+	case SDL_AUDIO_S8 :
 		return 1;
 
-	case AUDIO_U16LSB :
-	case AUDIO_U16MSB :
-	case AUDIO_S16LSB :
-	case AUDIO_S16MSB :
-		return 2;
+//removed from SDL3
+//	case AUDIO_U16LSB :
+//	case AUDIO_U16MSB :
+//	case AUDIO_S16LSB :
+//	case AUDIO_S16MSB :
+//		return 2;
 
 	default :
 		assert(!"Unhandled sample format");
