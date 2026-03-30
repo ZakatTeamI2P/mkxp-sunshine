@@ -31,8 +31,6 @@
 #include <string>
 #include <utility>
 
-#include <SDL3_ttf/SDL_ttf.h>
-
 typedef std::pair<std::string, int> FontKey;
 
 struct FontSet
@@ -88,10 +86,10 @@ SharedFontState::~SharedFontState()
 	delete p;
 }
 
-void SharedFontState::initFontSetCB(SDL_IOStream &ops,
+void SharedFontState::initFontSetCB(SDL_IOStream* &ops,
                                     const std::string &filename)
 {
-	TTF_Font *font = TTF_OpenFontIO(&ops, 0, 0);
+	TTF_Font *font = TTF_OpenFontIO(ops, false, 0);
 
 	if (!font)
 		return;
@@ -109,7 +107,7 @@ void SharedFontState::initFontSetCB(SDL_IOStream &ops,
 		set.other = filename;
 }
 
-_TTF_Font *SharedFontState::getFont(std::string family,
+TTF_Font *SharedFontState::getFont(std::string family,
                                     int size)
 {
 	/* Check for substitutions */
@@ -147,8 +145,8 @@ _TTF_Font *SharedFontState::getFont(std::string family,
 		                 ? req.regular.c_str() : req.other.c_str();
 
 		//ops = SDL_OpenIO();
-		SDL_IOStream ops;
-		shState->fileSystem().openReadRaw(*ops, path, true);
+		SDL_IOStream* ops;
+		shState->fileSystem().openReadRaw(ops, path);
 	}
 
 	font = TTF_OpenFontIO(ops, 1, size);
@@ -157,7 +155,7 @@ _TTF_Font *SharedFontState::getFont(std::string family,
 		throw Exception(Exception::SDLError, "%s", SDL_GetError());
 
 	p->pool.insert(key, font);
-	return (_TTF_Font*)font;
+	return font;
 }
 
 bool SharedFontState::fontPresent(std::string family) const
@@ -410,7 +408,7 @@ void Font::initDefaults(const SharedFontState &sfs)
 	FontPrivate::defaultShadow  = (rgssVer == 2 ? true : false);
 }
 
-_TTF_Font *Font::getSdlFont()
+TTF_Font *Font::getSdlFont()
 {
 	if (!p->sdlFont)
 		p->sdlFont = shState->fontState().getFont(p->name.c_str(),
