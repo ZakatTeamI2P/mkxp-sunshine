@@ -13,6 +13,17 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 ## Setup main source ##
 
+# oldimpls dir stuff
+set(OLDIMPLS_HEADERS
+	src/oldimpls/include.h
+	src/oldimpls/sdl/include.h
+)
+
+set(OLDIMPLS_SOURCE
+	src/oldimpls/sdl/rgb-surfaces.cpp
+)
+
+# main stuff
 set(MAIN_HEADERS
 	src/quadarray.h
 	src/audio.h
@@ -74,6 +85,7 @@ set(MAIN_HEADERS
 	chromasdk/RzErrors.h
 	chromasdk/ChromaApi.h
 	src/i18n.h
+	${OLDIMPLS_HEADERS}
 )
 
 set(MAIN_SOURCE
@@ -116,6 +128,7 @@ set(MAIN_SOURCE
 	src/oneshot.cpp
 	src/screen.cpp
 	src/i18n.cpp
+	${OLDIMPLS_SOURCE}
 )
 
 if(WIN32)
