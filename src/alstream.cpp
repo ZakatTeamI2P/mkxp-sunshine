@@ -208,15 +208,15 @@ struct ALStreamOpenHandler : FileSystem::OpenHandler
 	ALDataSource *source;
 	std::string errorMsg;
 
-	ALStreamOpenHandler(SDL_IOStream &srcOps, bool looped)
-	    : srcOps(&srcOps), looped(looped), source(0)
+	ALStreamOpenHandler(SDL_IOStream* &srcOps, bool looped)
+	    : srcOps(srcOps), looped(looped), source(0)
 	{}
 
-	bool tryRead(SDL_IOStream &ops, const char *ext)
+	bool tryRead(SDL_IOStream* &ops, const char *ext)
 	{
 		/* Copy this because we need to keep it around,
 		 * as we will continue reading data from it later */
-		*srcOps = ops;
+		srcOps = ops;
 
 		/* Try to read ogg file signature */
 		char sig[5] = { 0 };

@@ -52,7 +52,7 @@ public:
 		 * After this function returns, ops becomes invalid, so don't take
 		 * references to it. Instead, copy the structure without closing
 		 * if you need to further read from it later. */
-		virtual bool tryRead(SDL_IOStream &ops, const char *ext) = 0;
+		virtual bool tryRead(SDL_IOStream* &ops, const char *ext) = 0;
 	};
 
 	void openRead(OpenHandler &handler,
