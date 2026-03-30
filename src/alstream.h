@@ -26,7 +26,7 @@
 #include "sdl-util.h"
 
 #include <string>
-#include <SDL_rwops.h>
+#include <SDL3/SDL_rwops.h>
 
 struct ALDataSource;
 
@@ -52,7 +52,7 @@ struct ALStream
 
 	std::string threadName;
 
-	SDL_mutex *pauseMut;
+	SDL_Mutex *pauseMut;
 	bool preemptPause;
 
 	/* When this flag isn't set and alSrc is
@@ -74,7 +74,7 @@ struct ALStream
 	uint64_t procFrames;
 	AL::Buffer::ID lastBuf;
 
-	SDL_RWops srcOps;
+	SDL_IOStream srcOps;
 
 	struct
 	{
