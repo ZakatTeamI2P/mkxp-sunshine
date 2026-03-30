@@ -192,13 +192,13 @@ struct SoundOpenHandler : FileSystem::OpenHandler
 	    : buffer(0)
 	{}
 
-	bool tryRead(SDL_IOStream &ops, const char *ext)
+	bool tryRead(SDL_IOStream* &ops, const char *ext)
 	{
-		Sound_Sample *sample = Sound_NewSample(&ops, ext, 0, STREAM_BUF_SIZE);
+		Sound_Sample *sample = Sound_NewSample(ops, ext, 0, STREAM_BUF_SIZE);
 
 		if (!sample)
 		{
-			SDL_CloseIO(&ops);
+			SDL_CloseIO(ops);
 			return false;
 		}
 
@@ -214,7 +214,7 @@ struct SoundOpenHandler : FileSystem::OpenHandler
 		ALenum alFormat = chooseALFormat(sampleSize, sample->actual.channels);
 
 		AL::Buffer::uploadData(buffer->alBuffer, alFormat, sample->buffer,
-							   buffer->bytes, sample->actual.rate);
+							   buffer->bytes, sample->actual.freq);
 
 		Sound_FreeSample(sample);
 

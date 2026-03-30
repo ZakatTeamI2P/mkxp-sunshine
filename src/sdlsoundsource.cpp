@@ -52,7 +52,7 @@ struct SDLSoundSource : ALDataSource
 		sampleSize = formatSampleSize(sample->actual.format);
 
 		alFormat = chooseALFormat(sampleSize, sample->actual.channels);
-		alFreq = sample->actual.rate;
+		alFreq = sample->actual.freq;
 	}
 
 	~SDLSoundSource()
@@ -98,7 +98,7 @@ struct SDLSoundSource : ALDataSource
 
 	int sampleRate()
 	{
-		return sample->actual.rate;
+		return sample->actual.freq;
 	}
 
 	void seekToOffset(float seconds)

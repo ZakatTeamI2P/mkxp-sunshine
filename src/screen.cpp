@@ -10,6 +10,8 @@
 #include "debugwriter.h"
 #include "pipe.h"
 
+// #include "oldimpls/include.h"
+
 static void showInitError(const std::string &msg)
 {
 	Debug() << msg;
@@ -48,7 +50,7 @@ int screenMain(Config &conf)
 	//}
 
 	SDL_Window *win;
-	win = SDL_CreateWindow("The Journal", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SDL_WINDOW_RESIZABLE);
+	win = SDL_CreateWindow("The Journal", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SDL_WINDOW_RESIZABLE | SDL_WINDOW_TRANSPARENT);
 	//SDL_SetWindowShape(win, );
 
 	if (!win)
@@ -57,13 +59,20 @@ int screenMain(Config &conf)
 		return 0;
 	}
 
-	SDL_WindowShapeMode shapeMode;
-	shapeMode.mode = ShapeModeColorKey;
-	shapeMode.parameters.colorKey = colorKey;
+	// SDL_WindowShapeMode shapeMode;
+	// shapeMode.mode = ShapeModeColorKey;
+	// shapeMode.parameters.colorKey = colorKey;
+
 	//SDL_Surface *surface = SDL_CreateSurface(32, 32, SDL_PIXELFORMAT_INDEX8);
 	//SDL_PIXELFORMAT_UNKNOWN - 0,0,0,0 ....maybe?
-	SDL_Surface *shape = SDL_CreateSurface(DEFAULT_WIDTH, DEFAULT_HEIGHT, SDL_PIXELFORMAT_UNKNOWN);
-	SDL_Palette *palette = SDL_CreateSurfacePalette(surface);
+
+	//SDL_Surface *surface = SDL_CreateSurface(32, 32, SDL_PIXELFORMAT_INDEX8);
+	//SDL_Surface *shape = SDL_CreateSurface(DEFAULT_WIDTH, DEFAULT_HEIGHT, SDL_PIXELFORMAT_UNKNOWN);
+
+	// i have no idea if it works.
+	//SDL_Surface *shape = SDL_CreateRGBSurface(0, DEFAULT_WIDTH, DEFAULT_HEIGHT, 8, 0, 0, 0, 0);
+	SDL_Surface *shape = SDL_CreateSurface(DEFAULT_WIDTH, DEFAULT_HEIGHT, SDL_PixelFormat::SDL_PIXELFORMAT_RGBA32);
+	SDL_Palette *palette = SDL_CreateSurfacePalette(shape);
 	SDL_SetPaletteColors(palette, &black, 0, 1);
 
 	char messageBuf[256];
@@ -88,7 +97,8 @@ int screenMain(Config &conf)
 			if ((shape = IMG_Load(imgname.c_str())) == NULL)
 				break;
 			SDL_SetWindowSize(win, shape->w, shape->h);
-			SDL_SetWindowShape(win, shape, &shapeMode);
+			// SDL_SetWindowShape(win, shape, &shapeMode);
+			SDL_SetWindowShape(win, shape);
 		}
 
 		// Redraw
