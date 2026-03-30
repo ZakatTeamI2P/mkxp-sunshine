@@ -739,7 +739,7 @@ struct SettingsMenuPrivate
 
 		case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
 			desc.type = CButton;
-			desc.d.jb = event.cbutton.button;
+			desc.d.jb = event.gbutton.button;
 			break;
 
 		case SDL_EVENT_GAMEPAD_AXIS_MOTION:
@@ -758,7 +758,7 @@ struct SettingsMenuPrivate
 
 		case SDL_EVENT_JOYSTICK_BUTTON_DOWN:
 			desc.type = JButton;
-			desc.d.jb = event.cbutton.button;
+			desc.d.jb = event.gbutton.button;
 			break;
 
 		case SDL_EVENT_JOYSTICK_HAT_MOTION:

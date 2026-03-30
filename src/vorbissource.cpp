@@ -27,19 +27,19 @@
 #include <vector>
 #include <algorithm>
 
-static size_t vfRead(void *ptr, size_t size, size_t nmemb, void *ops)
-{
-	return SDL_RWread(static_cast<SDL_IOStream*>(ops), ptr, size, nmemb);
+static size_t vfRead(void *ptr, size_t size, void *ops){
+	//size_t SDL_ReadIO(SDL_IOStream *context, void *ptr, size_t size);
+	return SDL_ReadIO(static_cast<SDL_IOStream*>(ops), ptr, size);
 }
 
 static int vfSeek(void *ops, ogg_int64_t offset, int whence)
 {
-	return SDL_RWseek(static_cast<SDL_IOStream*>(ops), offset, whence);
+	return SDL_SeekIO(static_cast<SDL_IOStream*>(ops), offset, whence);
 }
 
 static long vfTell(void *ops)
 {
-	return SDL_RWtell(static_cast<SDL_IOStream*>(ops));
+	return SDL_TellIO(static_cast<SDL_IOStream*>(ops));
 }
 
 static ov_callbacks OvCallbacks =

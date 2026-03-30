@@ -382,11 +382,11 @@ void EventThread::process(RGSSThreadData &rtData)
 			break;
 
 		case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
-			gcState.buttons[event.cbutton.button] = true;
+			gcState.buttons[event.gbutton.button] = true;
 			break;
 
 		case SDL_EVENT_GAMEPAD_BUTTON_UP:
-			gcState.buttons[event.cbutton.button] = false;
+			gcState.buttons[event.gbutton.button] = false;
 			break;
 
 		case SDL_EVENT_GAMEPAD_AXIS_MOTION:

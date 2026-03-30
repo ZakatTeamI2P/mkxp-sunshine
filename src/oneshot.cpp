@@ -98,8 +98,7 @@ struct linux_DialogData
 	bool result;
 };
 
-static int linux_dialog(void *rawData)
-{
+static int linux_dialog(void *rawData){
 	linux_DialogData *data = reinterpret_cast<linux_DialogData*>(rawData);
 
 	// Determine correct flags
