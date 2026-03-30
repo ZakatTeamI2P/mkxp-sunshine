@@ -55,27 +55,27 @@ class Game_Map
     'codebg'
   ]
   CLAMPED_X = [
-  ]
+    ]
   CLAMPED_Y = [
     'red_obsdesk',
-  ]
+    ]
   ANIMATED = [
     'blue_water',
-  ]
+    ]
   FADE_ANIMATION_PANORAMA = [
     'dark_water',
     'green_water',
-  ]
+    ]
   ONETOONE = [
     'blue_water',
     'green_water',
     'dark_water',
-  ]
+    ]
   NOZOOM = [
     'dark_water',
     #'green_water',
-  ]
-  
+    ]
+
   ALWAYS_MOVING = [
     'codebg'
   ]
@@ -165,10 +165,10 @@ class Game_Map
       @clamped_x = false
       @clamped_y = false
     end
-	
-	@always_moving = ALWAYS_MOVING.include? @panorama_name
-	@pan_move_offset = 0
-	
+
+    @always_moving = ALWAYS_MOVING.include? @panorama_name
+    @pan_move_offset = 0
+
     # Animated/One-to-one/zoom
     @pan_animate = ANIMATED.include? @panorama_name
     @pan_fade_animate = FADE_ANIMATION_PANORAMA.include? @panorama_name
@@ -260,51 +260,51 @@ class Game_Map
     # Clear refresh request flag
     @need_refresh = false
   end
-  
-  
+
+
   #--------------------------------------------------------------------------
   # * Scroll Down
   #     distance : scroll distance
   #--------------------------------------------------------------------------
   def scroll_down(distance)
-	if $game_switches[98] == true
+    if $game_switches[98] == true
       @display_y = [@display_y + distance, (self.height - 15) * 128].min
-	else
+    else
       @display_y += distance
-	end
+    end
   end
   #--------------------------------------------------------------------------
   # * Scroll Left
   #     distance : scroll distance
   #--------------------------------------------------------------------------
   def scroll_left(distance)
-	if $game_switches[98] == true
+    if $game_switches[98] == true
       @display_x = [@display_x - distance, 0].max
-	else
+    else
       @display_x -= distance
-	end
+    end
   end
   #--------------------------------------------------------------------------
   # * Scroll Right
   #     distance : scroll distance
   #--------------------------------------------------------------------------
   def scroll_right(distance)
-	if $game_switches[98] == true
+    if $game_switches[98] == true
       @display_x = [@display_x + distance, (self.width - 20) * 128].min
-	else
+    else
       @display_x += distance
-	end
+    end
   end
   #--------------------------------------------------------------------------
   # * Scroll Up
   #     distance : scroll distance
   #--------------------------------------------------------------------------
   def scroll_up(distance)
-	if $game_switches[98] == true
+    if $game_switches[98] == true
       @display_y = [@display_y - distance, 0].max
-	else
+    else
       @display_y -= distance
-	end
+    end
   end
   #--------------------------------------------------------------------------
   # * Determine Valid Coordinates
@@ -341,15 +341,15 @@ class Game_Map
         # If blank tile
         if event.tile_id == 0 && event.character_name.empty?
           return false
-        # If obstacle bit is set
+          # If obstacle bit is set
         elsif @passages[event.tile_id] & bit != 0
           # impassable
           return false
-        # If obstacle bit is set in all directions
+          # If obstacle bit is set in all directions
         elsif @passages[event.tile_id] & 0x0f == 0x0f
           # impassable
           return false
-        # If priorities other than that are 0
+          # If priorities other than that are 0
         elsif @priorities[event.tile_id] == 0
           # passable
           return true
@@ -374,11 +374,11 @@ class Game_Map
       if @passages[tile_id] & bit != 0
         # impassable
         return false
-      # If obstacle bit is set in all directions
+        # If obstacle bit is set in all directions
       elsif @passages[tile_id] & 0x0f == 0x0f
         # impassable
         return false
-      # If priorities other than that are 0
+        # If priorities other than that are 0
       elsif @priorities[tile_id] == 0
         # passable
         return true

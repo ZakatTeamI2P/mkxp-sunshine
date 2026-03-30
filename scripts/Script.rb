@@ -2,8 +2,7 @@ PROTO_TEXT = "put me in the big portal"
 CEDRIC_TEXT = "put me in the big portal"
 RUE_TEXT = "put me in the big portal"
 
-# Gnome 3 does not show desktop entries in Nautilus.
-SUPPORTED_DE = ["cinnamon", "mate", "kde", "xfce"]
+SUPPORTED_DE = ["cinnamon", "mate", "kde", "xfce", "gnome", "lxde", "lxqt"]
 
 module Script
   def self.px

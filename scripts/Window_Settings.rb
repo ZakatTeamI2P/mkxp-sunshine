@@ -6,7 +6,10 @@ class Window_Settings
   VALUE_MARGIN = 270
   ACTIVE_MARGIN = MARGIN * 2 + 20
   SETTINGS_FILE_NAME = Oneshot::SAVE_PATH + '/settings.conf'
-
+  class << self
+    attr_accessor :DebugIsEnabled
+  end
+  @DebugIsEnabled = false
   def save_settings
     $persistent.save
     File.open(SETTINGS_FILE_NAME, 'w') do |file|
@@ -17,6 +20,8 @@ class Window_Settings
       file.puts('colorblind_mode=' + $game_switches[252].to_s)
       file.puts('automash_enabled=' + $game_switches[253].to_s)
       file.puts('frameskip=' + Graphics.frameskip.to_s)
+      file.puts('in_game_timer=' + $game_temp.igt_timer_visible.to_s)
+      file.puts('debug=' + Window_Settings.DebugIsEnabled.to_s)
     end
   end
 
@@ -64,16 +69,25 @@ class Window_Settings
 		elsif vals[1] == "false"
 		  $game_switches[253] = false
 		end
+      when "in_game_timer"
+        timer_enabled = vals[1] == "true"
+        $game_temp.igt_timer_visible = timer_enabled
+        $scene.in_game_timer.visible = timer_enabled if $scene.is_a?(Scene_Map)
 	  when "frameskip"
 	    if vals[1] == "true"
 		  Graphics.frameskip = true
 		elsif vals[1] == "false"
 		  Graphics.frameskip = false
 		end
+      when "debug"
+        if vals[1] == "true"
+          Window_Settings.DebugIsEnabled = true
+        elsif vals[1] == "false"
+          Window_Settings.DebugIsEnabled = false
 	  end
     end
   end
-
+  end
   def initialize
     @viewport = Viewport.new(0, 0, 640, 480)
     @bg = Sprite.new(@viewport)
@@ -128,7 +142,9 @@ class Window_Settings
 			 tr('Colorblind mode'),
 			 tr('Skip Text (R)'),
 			 tr('Frameskip'),
+             tr('In-Game Timer'),
 			 tr('Language'),
+             tr('Debug mode(DEVELOPERS ONLY!)'),
 			 tr('Configure Controls (Press F1)'),
 			]
 
@@ -203,9 +219,18 @@ class Window_Settings
 		  else
 		    spr.bitmap.draw_text(VALUE_MARGIN, 0, spr.bitmap.width, spr.bitmap.height, tr("OFF"))
 		  end
-        when 7 # Language
+        when 7 # In-game timer
+          text = tr($game_temp.igt_timer_visible ? "ON" : "OFF")
+          spr.bitmap.draw_text(VALUE_MARGIN, 0, spr.bitmap.width, spr.bitmap.height, text)
+        when 8 # Language
           l = Language::LANGUAGES[@lang_index] rescue Language::LANGUAGES[0]
           spr.bitmap.draw_text(VALUE_MARGIN, 0, spr.bitmap.width, spr.bitmap.height, tr(l))
+        when 9
+          if(Window_Settings.DebugIsEnabled == true)
+            spr.bitmap.draw_text(VALUE_MARGIN, 0, spr.bitmap.width, spr.bitmap.height, tr("ON"))
+          else
+            spr.bitmap.draw_text(VALUE_MARGIN, 0, spr.bitmap.width, spr.bitmap.height, tr("OFF"))
+          end
         end
   end
 
@@ -423,8 +448,13 @@ class Window_Settings
 	      end
 		  redraw_setting_index(6)
 		end
-
-	  when 7 #language
+      when 7 # In-game timer
+        if Input.trigger?(Input::ACTION) || Input.trigger?(Input::LEFT) || Input.trigger?(Input::RIGHT)
+          $game_temp.igt_timer_visible = !$game_temp.igt_timer_visible
+          $scene.in_game_timer.visible = $game_temp.igt_timer_visible if $scene.is_a?(Scene_Map)
+          redraw_setting_index(7)
+        end
+	  when 8 #language
 	    if Input.trigger?(Input::ACTION) || Input.trigger?(Input::RIGHT)
           @lang_index += 1
           if @lang_index >= Language::LANGUAGES.length
@@ -441,6 +471,11 @@ class Window_Settings
           $persistent.lang = Language::LANGUAGES[@lang_index]
           redraw_all_settings()
 		end
+      when 9
+        if Input.trigger?(Input::ACTION) || Input.trigger?(Input::LEFT) || Input.trigger?(Input::RIGHT)
+          Window_Settings.DebugIsEnabled = !Window_Settings.DebugIsEnabled
+          redraw_setting_index(9)
+        end
 	end
 
     if Input.trigger?(Input::CANCEL)

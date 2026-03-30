@@ -51,6 +51,7 @@ class FastTravel
     end
     zone = ZONES[$game_fasttravel.zone]
 
+
     # Create title
     @title.bitmap.clear
     @title.bitmap.draw_text(0, 0, @title.bitmap.width, @title.bitmap.height, zone.name)

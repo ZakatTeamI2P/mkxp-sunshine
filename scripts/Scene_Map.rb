@@ -5,6 +5,7 @@
 #==============================================================================
 
 class Scene_Map
+  attr_accessor :in_game_timer
   #--------------------------------------------------------------------------
   # * Main Processing
   #--------------------------------------------------------------------------
@@ -103,12 +104,12 @@ class Scene_Map
   #--------------------------------------------------------------------------
   def update
     if $game_temp.igt_timer_visible && (Graphics.frame_count != nil)
-      total_sec = Graphics.frame_count / Graphics.frame_rate
-      hour = total_sec / 60 / 60
-      min = total_sec / 60 % 60
-      sec = total_sec % 60
-      millisec = ((Graphics.frame_count * 1000) / Graphics.frame_rate) % 1000
-      time_string = sprintf("%02d:%02d:%02d.%03d", hour, min, sec, millisec)
+      total_sec = Graphics.frame_count.to_f / Graphics.frame_rate
+      time_string = sprintf("%02d:%02d:%02d.%03d",
+                            total_sec / 3600,
+                            total_sec / 60 % 60,
+                            total_sec % 60,
+                            total_sec * 1000 % 1000)
 
       @in_game_timer.bitmap.fill_rect(0, 0, 140, 30, Color.new(0, 0, 0, 128))
       @in_game_timer.bitmap.draw_text(8, 0, 132, 30, time_string)
@@ -320,7 +321,7 @@ class Scene_Map
     #  Chroma.playAnim("chroma/Random_Keyboard.chroma", false);
     #end
     # If debug mode is ON and F9 key was pressed
-    if Input.press?(Input::F9) && File.exists?("debug_tester.dat")
+    if Input.press?(Input::F9) && Window_Settings.DebugIsEnabled = true
        # Set debug calling flag
        $game_temp.debug_calling = true
     end
