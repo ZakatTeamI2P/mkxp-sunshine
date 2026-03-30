@@ -44,6 +44,9 @@
 #include "font.h"
 #include "eventthread.h"
 
+// :3c
+#include "oldimpls/include.h"
+
 #define GUARD_MEGA \
 	{ \
 		if (p->megaSurface) \
@@ -92,7 +95,7 @@ struct BitmapPrivate
 	 * getPixel calls. Is invalidated any time the bitmap
 	 * is modified */
 	SDL_Surface *surface;
-	SDL_PixelFormatDetails format;
+	SDL_PixelFormatDetails* format;
 
 	/* The 'tainted' area describes which parts of the
 	 * bitmap are not cleared, ie. don't have 0 opacity.
@@ -107,7 +110,7 @@ struct BitmapPrivate
 	      megaSurface(0),
 	      surface(0)
 	{
-		format = SDL_GetPixelFormatDetails(SDL_PIXELFORMAT_ABGR8888);
+		format = (SDL_PixelFormatDetails*)SDL_GetPixelFormatDetails(SDL_PixelFormat::SDL_PIXELFORMAT_ABGR8888);
 
 		font = &shState->defaultFont();
 		pixman_region_init(&tainted);
@@ -121,7 +124,7 @@ struct BitmapPrivate
 
 	void allocSurface()
 	{
-		surface = SDL_CreateSurface(gl.width, gl.height, format);
+		surface = SDL_CreateSurface(gl.width, gl.height, format->format);
 	}
 
 	void clearTaintedArea()
@@ -209,12 +212,12 @@ struct BitmapPrivate
 		glState.scissorTest.pop();
 	}
 
-	static void ensureFormat(SDL_Surface *&surf, Uint32 format)
+	static void ensureFormat(SDL_Surface *&surf, SDL_PixelFormat format)
 	{
-		if (surf->format->format == format)
+		if (surf->format == format)
 			return;
 
-		SDL_Surface *surfConv = SDL_ConvertSurface(surf, format, 0);
+		SDL_Surface *surfConv = SDL_ConvertSurface(surf, format);
 		SDL_DestroySurface(surf);
 		surf = surfConv;
 	}
@@ -239,9 +242,9 @@ struct BitmapOpenHandler : FileSystem::OpenHandler
 	    : surf(0)
 	{}
 
-	bool tryRead(SDL_IOStream &ops, const char *ext)
+	bool tryRead(SDL_IOStream* &ops, const char *ext)
 	{
-		surf = IMG_LoadTyped_IO(&ops, 1, ext);
+		surf = IMG_LoadTyped_IO(ops, 1, ext);
 		return surf != 0;
 	}
 };
@@ -442,7 +445,7 @@ void Bitmap::stretchBlt(const IntRect &destRect,
 		SDL_Surface *blitTemp =
 			SDL_CreateRGBSurface(0, destRect.w, destRect.h, bpp, rMask, gMask, bMask, aMask);
 
-		SDL_BlitSurfaceScaled(srcSurf, &srcRect, blitTemp, 0);
+		SDL_BlitSurfaceScaled(srcSurf, &srcRect, blitTemp, NULL, SDL_ScaleMode::SDL_SCALEMODE_NEAREST);
 
 		TEX::bind(p->gl.tex);
 
@@ -766,9 +769,9 @@ void Bitmap::clear()
 	p->onModified();
 }
 
-static uint32_t &getPixelAt(SDL_Surface *surf, SDL_PixelFormat *form, int x, int y)
+static uint32_t &getPixelAt(SDL_Surface *surf, SDL_PixelFormatDetails *form, int x, int y)
 {
-	size_t offset = x*form->BytesPerPixel + y*surf->pitch;
+	size_t offset = x * form->bytes_per_pixel + y * surf->pitch;
 	uint8_t *bytes = (uint8_t*) surf->pixels + offset;
 
 	return *((uint32_t*) bytes);
@@ -830,7 +833,7 @@ void Bitmap::setPixel(int x, int y, const Color &color)
 	{
 		uint32_t &surfPixel = getPixelAt(p->surface, p->format, x, y);
 		//  pixel = SDL_MapSurfaceRGBA(surface, r, g, b, a);
-		surfPixel = SDL_MapSurfaceRGBA(p, pixel[0], pixel[1], pixel[2], pixel[3]);
+		surfPixel = SDL_MapSurfaceRGBA(p->surface, pixel[0], pixel[1], pixel[2], pixel[3]);
 	}
 
 	p->onModified(false);
@@ -896,11 +899,11 @@ static std::string fixupString(const char *str)
 	return s;
 }
 
-static void applyShadow(SDL_Surface *&in, const SDL_PixelFormat &fm, const SDL_Color &c)
+static void applyShadow(SDL_Surface *&in, const SDL_PixelFormatDetails* fm, const SDL_Color &c)
 {
 	//SDL_CreateSurface(32, 32, SDL_PIXELFORMAT_INDEX8);
-	// SDL_Surface *out = SDL_CreateRGBSurface(0, in->w+1, in->h+1, fm.BitsPerPixel, fm.Rmask, fm.Gmask, fm.Bmask, fm.Amask);
-	SDL_Surface *out = SDL_CreateRGBSurface(in->w+1, in->h+1, fm.Rmask, fm.Gmask, fm.Bmask, fm.Amask);
+	SDL_Surface *out = SDL_CreateRGBSurface(0, in->w+1, in->h+1, fm->bits_per_pixel, fm->Rmask, fm->Gmask, fm->Bmask, fm->Amask);
+	//SDL_Surface *out = SDL_CreateRGBSurface(in->w+1, in->h+1, fm->Rmask, fm->Gmask, fm->Bmask, fm->Amask);
 
 	float fr = c.r / 255.0f;
 	float fg = c.g / 255.0f;
@@ -927,7 +930,7 @@ static void applyShadow(SDL_Surface *&in, const SDL_PixelFormat &fm, const SDL_C
 				shd = ((uint32_t*) ((uint8_t*) in->pixels + (y-1)*in->pitch))[x-1];
 
 			/* Set shadow pixel RGB values to 0 (black) */
-			shd &= fm.Amask;
+			shd &= (uint32_t)fm->Amask;
 
 			if (x == 0 || y == 0)
 			{
@@ -943,8 +946,8 @@ static void applyShadow(SDL_Surface *&in, const SDL_PixelFormat &fm, const SDL_C
 
 			/* Input and shadow alpha values */
 			uint8_t srcA, shdA;
-			srcA = (src & fm.Amask) >> fm.Ashift;
-			shdA = (shd & fm.Amask) >> fm.Ashift;
+			srcA = (src & fm->Amask) >> fm->Ashift;
+			shdA = (shd & fm->Amask) >> fm->Ashift;
 
 			if (srcA == 255 || shdA == 0)
 			{
@@ -976,7 +979,7 @@ static void applyShadow(SDL_Surface *&in, const SDL_PixelFormat &fm, const SDL_C
 			b = clamp<float>(fb * co3, 0, 1) * 255.0f;
 			a = clamp<float>(fa, 0, 1) * 255.0f;
 
-			*outP = SDL_MapRGBA(&fm, r, g, b, a);
+			*outP = SDL_MapSurfaceRGBA(out, r, g, b, a);
 		}
 
 	/* Store new surface in the input pointer */
@@ -1011,16 +1014,16 @@ void Bitmap::drawText(const IntRect &rect, const char *str, int align)
 	SDL_Surface *txtSurf;
 
 	if (shState->rtData().config.solidFonts)
-		txtSurf = TTF_RenderText_Solid(font, str, c);
+		txtSurf = TTF_RenderText_Solid(font, str, strlen(str), c);
 	else
-		txtSurf = TTF_RenderText_Blended(font, str, c);
+		txtSurf = TTF_RenderText_Blended(font, str, strlen(str), c);
 
 	p->ensureFormat(txtSurf, SDL_PIXELFORMAT_ABGR8888);
 
 	int rawTxtSurfH = txtSurf->h;
 
 	if (p->font->getShadow())
-		applyShadow(txtSurf, *p->format, c);
+		applyShadow(txtSurf, p->format, c);
 
 	/* outline using TTF_Outline and blending it together with SDL_BlitSurface
 	 * FIXME: outline is forced to have the same opacity as the font color */
@@ -1032,9 +1035,9 @@ void Bitmap::drawText(const IntRect &rect, const char *str, int align)
 		/* set the next font render to render the outline */
 		TTF_SetFontOutline(font, OUTLINE_SIZE);
 		if (shState->rtData().config.solidFonts)
-			outline = TTF_RenderText_Solid(font, str, co);
+			outline = TTF_RenderText_Solid(font, str, strlen(str), co);
 		else
-			outline = TTF_RenderText_Blended(font, str, co);
+			outline = TTF_RenderText_Blended(font, str, strlen(str), co);
 
 		p->ensureFormat(outline, SDL_PIXELFORMAT_ABGR8888);
 		SDL_Rect outRect = {OUTLINE_SIZE, OUTLINE_SIZE, txtSurf->w, txtSurf->h}; 
@@ -1256,8 +1259,13 @@ IntRect Bitmap::textSize(const char *str)
 	std::string fixed = fixupString(str);
 	str = fixed.c_str();
 
+	// i don't know if its right migration, i didn't find any other way
+	TTF_Text* text = TTF_CreateText(NULL, font, str, strlen(str));
+	
 	int w, h;
-	TTF_SizeText(font, str, &w, &h);
+	TTF_GetTextSize(text, &w, &h);
+
+	TTF_DestroyText(text);
 
 	/* If str is one character long, *endPtr == 0 */
 	const char *endPtr;
