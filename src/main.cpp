@@ -369,15 +369,13 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	//SDL_DisplayMode mode;
-	//SDL_GetDisplayMode(0, 0, &mode);
-
+	SDL_DisplayMode mode;
 	/* Can't sync to display refresh rate if its value is unknown */
 	//if (!mode.refresh_rate)
 	//	conf.syncToRefreshrate = false;
 
 	EventThread eventThread;
-	//RGSSThreadData rtData(&eventThread, win, alcDev, mode.refresh_rate, conf);
+	RGSSThreadData rtData(&eventThread, win, alcDev, mode.refresh_rate, conf);
 
 #ifndef STEAM
 	/* Add controller bindings from embedded controller DB */

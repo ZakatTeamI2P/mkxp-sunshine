@@ -478,7 +478,7 @@ struct SettingsMenuPrivate
 	}
 
 	SDL_Surface *createTextSurface(const char *str, bool bold){
-		//SDL_Color c = { cText, cText, cText, 255 };
+		SDL_Color c = { cText, cText, cText, 255 };
 		applyFontStyle(bold);
 
 		return TTF_RenderText_Blended(font, str, strlen(str), c);
