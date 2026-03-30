@@ -724,7 +724,7 @@ struct SettingsMenuPrivate
 		{
 		case SDL_EVENT_KEY_DOWN:
 			desc.type = Key;
-			desc.d.scan = event.key.keysym.scancode;
+			desc.d.scan = event.key.scancode;
 
 			/* Special case aliases */
 			if (desc.d.scan == SDL_SCANCODE_RSHIFT)
@@ -1152,10 +1152,35 @@ SettingsMenu::~SettingsMenu()
 bool SettingsMenu::onEvent(const SDL_Event &event,
                            const std::map<int, SDL_Joystick*> &joysticks)
 {
-	/* First, check whether this event is for us */
+	switch (event.window.type)
+	{
+		case SDL_EVENT_WINDOW_SHOWN : // SDL is bugged and doesn't give us a first FOCUS_GAINED event
+		case SDL_EVENT_WINDOW_FOCUS_GAINED :
+			p->hasFocus = true;
+			break;
+
+		case SDL_EVENT_WINDOW_FOCUS_LOST :
+			p->hasFocus = false;
+			break;
+
+		case SDL_EVENT_WINDOW_EXPOSED :
+			SDL_UpdateWindowSurface(p->window);
+			break;
+
+		case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+			if (p->hovered)
+			{
+				p->hovered->leave();
+				p->hovered = 0;
+			}
+			break;
+
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+			p->onCancel();
+	}
+
 	switch (event.type)
 	{
-	case SDL_WINDOWEVENT :
 	case SDL_EVENT_MOUSE_BUTTON_DOWN :
 	case SDL_EVENT_MOUSE_BUTTON_UP :
 	case SDL_EVENT_MOUSE_MOTION :
@@ -1190,37 +1215,6 @@ bool SettingsMenu::onEvent(const SDL_Event &event,
 	case SDL_EVENT_MOUSE_BUTTON_UP :
 	case SDL_EVENT_KEY_UP :
 		return true;
-
-	case SDL_WINDOWEVENT :
-		switch (event.window.event)
-		{
-		case SDL_EVENT_WINDOW_SHOWN : // SDL is bugged and doesn't give us a first FOCUS_GAINED event
-		case SDL_EVENT_WINDOW_FOCUS_GAINED :
-			p->hasFocus = true;
-			break;
-
-		case SDL_EVENT_WINDOW_FOCUS_LOST :
-			p->hasFocus = false;
-			break;
-
-		case SDL_EVENT_WINDOW_EXPOSED :
-			SDL_UpdateWindowSurface(p->window);
-			break;
-
-		case SDL_EVENT_WINDOW_MOUSE_LEAVE:
-			if (p->hovered)
-			{
-				p->hovered->leave();
-				p->hovered = 0;
-			}
-			break;
-
-		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-			p->onCancel();
-		}
-
-		return true;
-
 	case SDL_EVENT_MOUSE_MOTION:
 		p->onMotion(event.motion);
 		return true;
@@ -1228,9 +1222,9 @@ bool SettingsMenu::onEvent(const SDL_Event &event,
 	case SDL_EVENT_KEY_DOWN:
 		if (p->state != AwaitingInput)
 		{
-			if (event.key.keysym.sym == SDLK_RETURN)
+			if (event.key.sym == SDLK_RETURN)
 				p->onAccept();
-			else if (event.key.keysym.sym == SDLK_ESCAPE)
+			else if (event.key.sym == SDLK_ESCAPE)
 				p->onCancel();
 
 			return true;
@@ -1238,7 +1232,7 @@ bool SettingsMenu::onEvent(const SDL_Event &event,
 
 		/* Don't let the user bind keys that trigger
 		 * mkxp functions */
-		switch(event.key.keysym.scancode)
+		switch(event.key.scancode)
 		{
 		case SDL_SCANCODE_F1:
 		case SDL_SCANCODE_F2:

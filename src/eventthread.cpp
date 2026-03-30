@@ -30,11 +30,6 @@
 #include <SDL3/SDL_touch.h>
 #include <SDL3/SDL_rect.h>
 
-// #include <al.h>
-#include <AL/al.h>
-// #include <alc.h>
-#include <AL/alc.h>
-
 #include "sharedstate.h"
 #include "graphics.h"
 #include "settingsmenu.h"
@@ -223,12 +218,9 @@ void EventThread::process(RGSSThreadData &rtData)
 			break;
 		}
 
-		/* Now process the rest */
-		switch (event.type)
-		{
-		case SDL_WINDOWEVENT :
-			switch (event.window.event)
-			{
+		//Window events
+
+		switch (event.window.type){
 			//SDL_WINDOWEVENT_SIZE_CHANGED - handle the SDL_EVENT_WINDOW_RESIZED and SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED events instead
 			case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED :
 				winW = event.window.data1;
@@ -275,17 +267,18 @@ void EventThread::process(RGSSThreadData &rtData)
 				resetInputStates();
 
 				break;
-			}
+		#ifdef __APPLE__
+			case SDL_EVENT_WINDOW_MOVED:
+				if (shState != NULL && event.window.data1 && event.window.data2)
+					shState->oneshot().setWindowPos(event.window.data1, event.window.data2);
+				break;
+		#endif
+		}
 
-			#ifdef __APPLE__
-				case SDL_EVENT_WINDOW_MOVED:
-					if (shState != NULL && event.window.data1 && event.window.data2)
-						shState->oneshot().setWindowPos(event.window.data1, event.window.data2);
-					break;
-			#endif
 
-			break;
-
+		/* Now process the rest */
+		switch (event.type)
+		{
 		case SDL_EVENT_QUIT :
 			if (rtData.allowExit) {
 				terminate = true;
@@ -301,7 +294,7 @@ void EventThread::process(RGSSThreadData &rtData)
 			break;
 
 		case SDL_EVENT_KEY_DOWN :
-			if (event.key.keysym.scancode == SDL_SCANCODE_F1)
+			if (event.key.scancode == SDL_SCANCODE_F1)
 			{
 				if (!sMenu)
 				{
@@ -312,7 +305,7 @@ void EventThread::process(RGSSThreadData &rtData)
 				sMenu->raise();
 			}
 
-			if (event.key.keysym.scancode == SDL_SCANCODE_F2)
+			if (event.key.scancode == SDL_SCANCODE_F2)
 			{
 				if (!displayingFPS)
 				{
@@ -341,7 +334,7 @@ void EventThread::process(RGSSThreadData &rtData)
 				break;
 			}
 
-			if (event.key.keysym.scancode == SDL_SCANCODE_F12)
+			if (event.key.scancode == SDL_SCANCODE_F12)
 			{
 				if (!rtData.config.debugMode)
 					break;
@@ -356,19 +349,19 @@ void EventThread::process(RGSSThreadData &rtData)
 			}
 
 			if (rtData.acceptingTextInput) {
-				if (event.key.keysym.sym == SDLK_BACKSPACE && rtData.inputText.length() > 0)
+				if (event.key.sym == SDLK_BACKSPACE && rtData.inputText.length() > 0)
 					rtData.inputText.pop_back();
-				else if (event.key.keysym.sym == SDLK_RETURN)
+				else if (event.key.sym == SDLK_RETURN)
 					rtData.acceptingTextInput.clear();
 
 				break;
 			}
 
-			keyStates[event.key.keysym.scancode] = true;
+			keyStates[event.key.scancode] = true;
 			break;
 
 		case SDL_EVENT_KEY_UP :
-			if (event.key.keysym.scancode == SDL_SCANCODE_F12)
+			if (event.key.scancode == SDL_SCANCODE_F12)
 			{
 				if (!rtData.config.debugMode)
 					break;
@@ -378,7 +371,7 @@ void EventThread::process(RGSSThreadData &rtData)
 				break;
 			}
 
-			keyStates[event.key.keysym.scancode] = false;
+			keyStates[event.key.scancode] = false;
 			break;
 
 		case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
@@ -586,8 +579,8 @@ bool EventThread::eventFilter(void *data, SDL_Event *event)
 		return 0;
 
 	/* Workaround for Windows pausing on drag */
-	case SDL_WINDOWEVENT:
-		if (event->window.event == SDL_EVENT_WINDOW_MOVED)
+	default:
+		if (event->window.event->type == SDL_EVENT_WINDOW_MOVED)
 		{
 			if (shState != NULL && shState->rgssVersion > 0)
 			{

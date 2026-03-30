@@ -108,7 +108,7 @@ RB_METHOD(fileIntGetByte)
 	SDL_IOStream *ops = getPrivateData<SDL_IOStream>(self);
 
 	unsigned char byte;
-	size_t result = SDL_RWread(ops, &byte, 1, 1);
+	size_t result = SDL_ReadIO(ops, &byte, 1);
 
 	return (result == 1) ? rb_fix_new(byte) : Qnil;
 }

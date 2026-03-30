@@ -23,6 +23,7 @@
 #define ALUTIL_H
 
 #include <AL/al.h>
+#include <AL/alc.h>
 #include <SDL3/SDL_audio.h>
 #include <assert.h>
 
