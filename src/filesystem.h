@@ -59,9 +59,9 @@ public:
 	              const char *filename);
 
 	/* Circumvents extension supplementing */
-	void openReadRaw(SDL_IOStream &ops,
-	                 const char *filename,
-	                 bool freeOnClose = false);
+	void openReadRaw(SDL_IOStream* &ops,
+	                 const char *filename);
+	                 //bool freeOnClose = false);
 
 	/* Does not perform extension supplementing */
 	bool exists(const char *filename);
