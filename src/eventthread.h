@@ -27,11 +27,11 @@
 #include "sdl-util.h"
 #include "keybindings.h"
 
-#include <SDL_scancode.h>
-#include <SDL_joystick.h>
-#include <SDL_gamecontroller.h>
-#include <SDL_mouse.h>
-#include <SDL_mutex.h>
+#include <SDL3/SDL_scancode.h>
+#include <SDL3/SDL_joystick.h>
+#include <SDL3/SDL_gamecontroller.h>
+#include <SDL3/SDL_mouse.h>
+#include <SDL3/SDL_mutex.h>
 
 #include <string>
 
@@ -49,8 +49,8 @@ class EventThread
 public:
 	struct ControllerState
 	{
-		int axes[SDL_CONTROLLER_AXIS_MAX];
-		bool buttons[SDL_CONTROLLER_BUTTON_MAX];
+		int axes[SDL_GAMEPAD_AXIS_COUNT];
+		bool buttons[SDL_GAMEPAD_BUTTON_COUNT];
 	};
 
 	struct JoyState
@@ -78,7 +78,7 @@ public:
 		FingerState fingers[MAX_FINGERS];
 	};
 
-	static uint8_t keyStates[SDL_NUM_SCANCODES];
+	static uint8_t keyStates[SDL_SCANCODE_COUNT];
 	static ControllerState gcState;
 	static JoyState joyState;
 	static MouseState mouseState;
