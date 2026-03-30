@@ -26,8 +26,8 @@
 #include "exception.h"
 #include "util.h"
 
-#include <SDL_scancode.h>
-#include <SDL_mouse.h>
+#include <SDL3/SDL_scancode.h>
+#include <SDL3/SDL_mouse.h>
 
 #include <vector>
 #include <string.h>

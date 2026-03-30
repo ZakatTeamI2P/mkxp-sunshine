@@ -107,18 +107,18 @@ static elementsN(defaultKbBindings);
 
 static const GcBindingData defaultGcBindings[] =
 {
-    { SDL_CONTROLLER_BUTTON_DPAD_LEFT,     Input::Left       },
-    { SDL_CONTROLLER_BUTTON_DPAD_RIGHT,    Input::Right      },
-    { SDL_CONTROLLER_BUTTON_DPAD_UP,       Input::Up         },
-    { SDL_CONTROLLER_BUTTON_DPAD_DOWN,     Input::Down       },
-    { SDL_CONTROLLER_BUTTON_A,             Input::Action     },
-    { SDL_CONTROLLER_BUTTON_B,             Input::Cancel     },
-    { SDL_CONTROLLER_BUTTON_X,             Input::Run        },
-    { SDL_CONTROLLER_BUTTON_Y,             Input::Items      },
-    { SDL_CONTROLLER_BUTTON_START,         Input::Menu       },
-    { SDL_CONTROLLER_BUTTON_BACK,          Input::Deactivate },
-    { SDL_CONTROLLER_BUTTON_LEFTSHOULDER,  Input::L          },
-    { SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, Input::R          },
+    { SDL_GAMEPAD_BUTTON_DPAD_LEFT,     Input::Left       },
+    { SDL_GAMEPAD_BUTTON_DPAD_RIGHT,    Input::Right      },
+    { SDL_GAMEPAD_BUTTON_DPAD_UP,       Input::Up         },
+    { SDL_GAMEPAD_BUTTON_DPAD_DOWN,     Input::Down       },
+    { SDL_GAMEPAD_BUTTON_A,             Input::Action     },
+    { SDL_GAMEPAD_BUTTON_B,             Input::Cancel     },
+    { SDL_GAMEPAD_BUTTON_X,             Input::Run        },
+    { SDL_GAMEPAD_BUTTON_Y,             Input::Items      },
+    { SDL_GAMEPAD_BUTTON_START,         Input::Menu       },
+    { SDL_GAMEPAD_BUTTON_BACK,          Input::Deactivate },
+    { SDL_GAMEPAD_BUTTON_LEFTSHOULDER,  Input::L          },
+    { SDL_GAMEPAD_BUTTON_RIGHTSHOULDER, Input::R          },
 };
 
 static elementsN(defaultGcBindings);

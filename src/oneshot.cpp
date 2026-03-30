@@ -9,9 +9,9 @@
 #include "bitmap.h"
 #include "font.h"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_image.h>
+#include <SDL3/SDL_ttf.h>
 
 // OS-Specific code
 #if defined _WIN32
@@ -311,6 +311,8 @@ Oneshot::Oneshot(RGSSThreadData &threadData) :
 			desktopEnv = "kde";
 		} else if (desktop.find("lxde") != std::string::npos) {
 			desktopEnv = "lxde";
+		} else if (desktop.find("lxde") != std::string::npos) {
+			desktopEnv = "lxqt";
 		} else if (desktop.find("deepin") != std::string::npos) {
 			desktopEnv = "deepin";
 		}
@@ -355,6 +357,9 @@ void Oneshot::update()
 		screenRect.w = 640;
 		screenRect.h = 480;
 
+		int num_displays;
+		SDL_DisplayID *displays = SDL_GetDisplays(&num_displays)
+
 		//Update obscured map and texture for window portion offscreen
 		for (int i = 0, max = SDL_GetNumVideoDisplays(); i < max; ++i)
 		{
@@ -363,7 +368,7 @@ void Oneshot::update()
 
 			//Get intersection of window and the screen
 			SDL_Rect intersect;
-			if (!SDL_IntersectRect(&screenRect, &bounds, &intersect))
+			if (!SDL_GetRectIntersection(&screenRect, &bounds, &intersect))
 				continue;
 			intersect.x -= screenRect.x;
 			intersect.y -= screenRect.y;

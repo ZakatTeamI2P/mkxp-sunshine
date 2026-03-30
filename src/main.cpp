@@ -21,10 +21,10 @@
 
 #include <alc.h>
 
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_ttf.h>
-#include <SDL_sound.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
+#include <SDL3_sound/SDL_sound.h>
 #include <physfs.h>
 
 #ifdef _MSC_VER
@@ -107,7 +107,7 @@ int rgssThreadFun(void *userdata)
 	catch (const Exception &exc)
 	{
 		rgssThreadError(threadData, exc.msg);
-		SDL_GL_DeleteContext(glCtx);
+		SDL_GL_DestroyContext(glCtx);
 
 		return 0;
 	}
@@ -149,7 +149,7 @@ int rgssThreadFun(void *userdata)
 	{
 		rgssThreadError(threadData, exc.msg);
 		alcDestroyContext(alcCtx);
-		SDL_GL_DeleteContext(glCtx);
+		SDL_GL_DestroyContext(glCtx);
 
 		return 0;
 	}
@@ -163,7 +163,7 @@ int rgssThreadFun(void *userdata)
 	SharedState::finiInstance();
 
 	alcDestroyContext(alcCtx);
-	SDL_GL_DeleteContext(glCtx);
+	SDL_GL_DestroyContext(glCtx);
 
 	return 0;
 }
@@ -171,24 +171,24 @@ int rgssThreadFun(void *userdata)
 static void showInitError(const std::string &msg)
 {
 	Debug() << msg;
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "OneShot", msg.c_str(), 0);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "OneShot: sunshine", msg.c_str(), 0);
 }
 
 static void setupWindowIcon(const Config &conf, SDL_Window *win)
 {
-	SDL_RWops *iconSrc;
+	SDL_IOStream *iconSrc;
 
 	if (conf.iconPath.empty())
-		iconSrc = SDL_RWFromConstMem(assets_icon_png, assets_icon_png_len);
+		iconSrc = SDL_IOFromConstMem(assets_icon_png, assets_icon_png_len);
 	else
-		iconSrc = SDL_RWFromFile(conf.iconPath.c_str(), "rb");
+		iconSrc = SDL_IOFromFile(conf.iconPath.c_str(), "rb");
 
-	SDL_Surface *iconImg = IMG_Load_RW(iconSrc, SDL_TRUE);
+	SDL_Surface *iconImg = IMG_Load_IO(iconSrc, true);
 
 	if (iconImg)
 	{
 		SDL_SetWindowIcon(win, iconImg);
-		SDL_FreeSurface(iconImg);
+		SDL_DestroySurface(iconImg);
 	}
 }
 
@@ -337,10 +337,8 @@ int main(int argc, char *argv[])
 
 	if (conf.fullscreen)
 		winFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-
-	win = SDL_CreateWindow(conf.windowTitle.c_str(),
-	                       SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-	                       conf.defScreenW, conf.defScreenH, winFlags);
+	//SDL_CreateWindow() has been simplified and no longer takes a window position.
+	win = SDL_CreateWindow(conf.windowTitle.c_str(), conf.defScreenW, conf.defScreenH, winFlags);
 
 	if (!win)
 	{
@@ -382,9 +380,9 @@ int main(int argc, char *argv[])
 
 #ifndef STEAM
 	/* Add controller bindings from embedded controller DB */
-	SDL_RWops *controllerDB = SDL_RWFromConstMem(assets_gamecontrollerdb_txt,
+	SDL_IOStream *controllerDB = SDL_IOFromConstMem(assets_gamecontrollerdb_txt,
 	                                             assets_gamecontrollerdb_txt_len);
-	SDL_GameControllerAddMappingsFromRW(controllerDB, 1);
+	SDL_AddGamepadMappingsFromIO(controllerDB, 1);
 #endif
 
 	int winW, winH;
