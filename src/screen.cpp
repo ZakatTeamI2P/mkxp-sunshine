@@ -48,9 +48,8 @@ int screenMain(Config &conf)
 	//}
 
 	SDL_Window *win;
-	win = SDL_CreateShapedWindow("The Journal",
-	                             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-	                             DEFAULT_WIDTH, DEFAULT_HEIGHT, 0);
+	win = SDL_CreateWindow("The Journal", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SDL_WINDOW_RESIZABLE);
+	//SDL_SetWindowShape(win, );
 
 	if (!win)
 	{
@@ -62,9 +61,10 @@ int screenMain(Config &conf)
 	shapeMode.mode = ShapeModeColorKey;
 	shapeMode.parameters.colorKey = colorKey;
 	//SDL_Surface *surface = SDL_CreateSurface(32, 32, SDL_PIXELFORMAT_INDEX8);
-	SDL_Surface *shape = SDL_CreateRGBSurface(DEFAULT_WIDTH, DEFAULT_HEIGHT, 0, 0, 0, 0);
-	//    SDL_Palette *palette = SDL_CreateSurfacePalette(surface);
-	SDL_SetPaletteColors(shape, &black, 0, 1);
+	//SDL_PIXELFORMAT_UNKNOWN - 0,0,0,0 ....maybe?
+	SDL_Surface *shape = SDL_CreateSurface(DEFAULT_WIDTH, DEFAULT_HEIGHT, SDL_PIXELFORMAT_UNKNOWN);
+	SDL_Palette *palette = SDL_CreateSurfacePalette(surface);
+	SDL_SetPaletteColors(palette, &black, 0, 1);
 
 	char messageBuf[256];
 

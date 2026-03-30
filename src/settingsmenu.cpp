@@ -395,10 +395,8 @@ struct SettingsMenuPrivate
 	{
 		int bpp;
 		Uint32 rMask, gMask, bMask, aMask;
-		SDL_GetMasksForPixelFormat(SDL_PIXELFORMAT_ABGR8888,
-		                           &bpp, &rMask, &gMask, &bMask, &aMask);
 		//SDL_Surface *surface = SDL_CreateSurface(32, 32, SDL_PIXELFORMAT_INDEX8);
-		return SDL_CreateRGBSurface(w, h, rMask, gMask, bMask, 0);
+		return SDL_CreateSurface(w, h, SDL_PIXELFORMAT_ABGR8888);
 	}
 
 	void fillSurface(SDL_Surface *surf, uint8_t grey){

@@ -156,8 +156,7 @@ _TTF_Font *SharedFontState::getFont(std::string family,
 		throw Exception(Exception::SDLError, "%s", SDL_GetError());
 
 	p->pool.insert(key, font);
-
-	return font;
+	return (_TTF_Font*)font;
 }
 
 bool SharedFontState::fontPresent(std::string family) const

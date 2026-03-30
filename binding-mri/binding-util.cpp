@@ -79,8 +79,7 @@ static const RbException excToRbExc[] =
     MKXP         /* MKXPError   */
 };
 
-void raiseRbExc(const Exception &exc)
-{
+void raiseRbExc(const Exception &exc){
 	RbData *data = getRbData();
 	VALUE excClass = data->exc[excToRbExc[exc.type]];
 

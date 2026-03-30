@@ -40,7 +40,7 @@ DEF_TYPE_CUSTOMFREE(FileInt, fileIntFreeInstance);
 static VALUE
 fileIntForPath(const char *path, bool rubyExc)
 {
-	SDL_IOStream *ops = SDL_OpenIO();
+	SDL_IOStream *ops;
 
 	try
 	{

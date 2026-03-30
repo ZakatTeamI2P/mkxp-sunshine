@@ -92,7 +92,7 @@ struct BitmapPrivate
 	 * getPixel calls. Is invalidated any time the bitmap
 	 * is modified */
 	SDL_Surface *surface;
-	SDL_PixelFormatDetails *format;
+	SDL_PixelFormatDetails format;
 
 	/* The 'tainted' area describes which parts of the
 	 * bitmap are not cleared, ie. don't have 0 opacity.
@@ -121,9 +121,7 @@ struct BitmapPrivate
 
 	void allocSurface()
 	{
-		surface = SDL_CreateRGBSurface(0, gl.width, gl.height, format->BitsPerPixel,
-		                               format->Rmask, format->Gmask,
-		                               format->Bmask, format->Amask);
+		surface = SDL_CreateSurface(gl.width, gl.height, format);
 	}
 
 	void clearTaintedArea()
@@ -1259,7 +1257,7 @@ IntRect Bitmap::textSize(const char *str)
 	str = fixed.c_str();
 
 	int w, h;
-	TTF_GetStringSize(font, str, &w, &h);
+	TTF_SizeText(font, str, &w, &h);
 
 	/* If str is one character long, *endPtr == 0 */
 	const char *endPtr;

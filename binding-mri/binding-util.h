@@ -23,6 +23,9 @@
 #define BINDING_UTIL_H
 
 #include <ruby.h>
+//костыль ебаный сука
+#undef snprintf
+
 #undef inline
 
 #include "exception.h"
