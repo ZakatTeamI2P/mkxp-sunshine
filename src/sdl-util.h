@@ -3,7 +3,7 @@
 
 #include <SDL3/SDL_atomic.h>
 #include <SDL3/SDL_thread.h>
-#include <SDL3/SDL_IOStream.h>
+#include <SDL3/SDL_iostream.h>
 
 #include <string>
 #include <iostream>
@@ -17,26 +17,26 @@ struct AtomicFlag
 
 	AtomicFlag(bool value)
 	{
-		SDL_AtomicSet(&atom, value ? 1 : 0);
+		SDL_SetAtomicInt(&atom, value ? 1 : 0);
 	}
 
 	void set()
 	{
-		SDL_AtomicSet(&atom, 1);
+		SDL_SetAtomicInt(&atom, 1);
 	}
 
 	void clear()
 	{
-		SDL_AtomicSet(&atom, 0);
+		SDL_SetAtomicInt(&atom, 0);
 	}
 
 	operator bool() const
 	{
-		return SDL_AtomicGet(&atom);
+		return SDL_GetAtomicInt(&atom);
 	}
 
 private:
-	mutable SDL_atomic_t atom;
+	mutable SDL_AtomicInt atom;
 };
 
 template<class C, void (C::*func)()>
@@ -91,7 +91,7 @@ template<size_t bufSize = 248, size_t pbSize = 8>
 class SDLRWBuf : public std::streambuf
 {
 public:
-	SDLRWBuf(SDL_RWops *ops)
+	SDLRWBuf(SDL_IOStream *ops)
 	    : ops(ops)
 	{
 		char *end = buf + bufSize + pbSize;
@@ -115,8 +115,8 @@ private:
 			memmove(base, egptr() - pbSize, pbSize);
 			start += pbSize;
 		}
-
-		size_t n = SDL_ReadIO(ops, start, 1, bufSize - (start - base));
+		//size_t SDL_ReadIO(SDL_IOStream *context, void *ptr, size_t size);
+		size_t n = SDL_ReadIO(ops, start, bufSize - (start - base));
 		if (n == 0)
 			return traits_type::eof();
 
@@ -156,7 +156,7 @@ public:
 	}
 
 private:
-	SDL_CloseIO *ops;
+	SDL_IOStream *ops;
 	SDLRWBuf<> buf;
 	std::istream s;
 };

@@ -91,7 +91,7 @@ SharedFontState::~SharedFontState()
 void SharedFontState::initFontSetCB(SDL_IOStream &ops,
                                     const std::string &filename)
 {
-	TTF_Font *font = TTF_OpenFontRW(&ops, 0, 0);
+	TTF_Font *font = TTF_OpenFontIO(&ops, 0, 0);
 
 	if (!font)
 		return;
@@ -150,7 +150,7 @@ _TTF_Font *SharedFontState::getFont(std::string family,
 		shState->fileSystem().openReadRaw(*ops, path, true);
 	}
 
-	font = TTF_OpenFontRW(ops, 1, size);
+	font = TTF_OpenFontIO(ops, 1, size);
 
 	if (!font)
 		throw Exception(Exception::SDLError, "%s", SDL_GetError());

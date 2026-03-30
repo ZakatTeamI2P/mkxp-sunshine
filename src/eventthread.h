@@ -184,7 +184,7 @@ struct UnidirMessage
 	}
 
 private:
-	SDL_mutex *mutex;
+	SDL_Mutex *mutex;
 	mutable AtomicFlag changed;
 	T current;
 };
@@ -213,8 +213,8 @@ private:
 		void waitForUnlock();
 
 		AtomicFlag locked;
-		SDL_mutex *mut;
-		SDL_cond *cond;
+		SDL_Mutex *mut;
+		SDL_Condition *cond;
 	};
 
 	Util mainSync;

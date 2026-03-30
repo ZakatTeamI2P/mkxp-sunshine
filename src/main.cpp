@@ -134,7 +134,7 @@ int rgssThreadFun(void *userdata)
 	if (!alcCtx)
 	{
 		rgssThreadError(threadData, "Error creating OpenAL context");
-		SDL_GL_DeleteContext(glCtx);
+		SDL_GL_DestroyContext(glCtx);
 
 		return 0;
 	}
@@ -238,7 +238,8 @@ int main(int argc, char *argv[])
 {
 	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
 	SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
-	SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+	//deleted from SDL3
+	//SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
 #if defined(__linux__) && SDL_VERSION_ATLEAST(2, 0, 8)
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
 #endif

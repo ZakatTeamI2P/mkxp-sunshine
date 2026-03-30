@@ -143,12 +143,12 @@ static PHYSFS_Io *createSDLRWIo(const char *filename)
 	return io;
 }
 
-static inline PHYSFS_File *sdlPHYS(SDL_RWops *ops)
+static inline PHYSFS_File *sdlPHYS(SDL_IOStream *ops)
 {
 	return static_cast<PHYSFS_File*>(ops->hidden.unknown.data1);
 }
 
-static Sint64 SDL_RWopsSize(SDL_RWops *ops)
+static Sint64 SDL_RWopsSize(SDL_IOStream *ops)
 {
 	PHYSFS_File *f = sdlPHYS(ops);
 
@@ -227,7 +227,7 @@ static int SDL_RWopsCloseFree(SDL_IOStream *ops)
 {
 	int result = SDL_RWopsClose(ops);
 
-	SDL_FreeRW(ops);
+	SDL_CloseIO(ops);
 
 	return result;
 }

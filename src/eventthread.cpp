@@ -23,7 +23,7 @@
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_joystick.h>
-#include <SDL3/SDL_gamecontroller.h>
+#include <SDL3/SDL_gamepad.h>
 #include <SDL3/SDL_messagebox.h>
 #include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_thread.h>
@@ -216,7 +216,7 @@ void EventThread::process(RGSSThreadData &rtData)
 		case SDL_EVENT_FINGER_DOWN :
 		case SDL_EVENT_FINGER_UP :
 		case SDL_EVENT_FINGER_MOTION :
-			if (event.tfinger.fingerId >= MAX_FINGERS)
+			if (event.tfinger.fingerID >= MAX_FINGERS)
 				continue;
 			break;
 		}
@@ -634,7 +634,7 @@ void EventThread::updateCursorState(bool inWindow, const SDL_Rect &screen){
 void EventThread::requestTerminate()
 {
 	SDL_Event event;
-	event.type = SDL_QUIT;
+	event.type = SDL_EVENT_QUIT;
 	SDL_PushEvent(&event);
 }
 
@@ -794,7 +794,7 @@ void SyncPoint::passSecondarySync()
 SyncPoint::Util::Util()
 {
 	mut = SDL_CreateMutex();
-	cond = SDL_CreateCond();
+	cond = SDL_CreateCondition();
 }
 
 SyncPoint::Util::~Util()

@@ -243,7 +243,7 @@ struct BitmapOpenHandler : FileSystem::OpenHandler
 
 	bool tryRead(SDL_IOStream &ops, const char *ext)
 	{
-		surf = IMG_LoadTyped_RW(&ops, 1, ext);
+		surf = IMG_LoadTyped_IO(&ops, 1, ext);
 		return surf != 0;
 	}
 };
@@ -278,7 +278,7 @@ Bitmap::Bitmap(const char *filename)
 		}
 		catch (const Exception &e)
 		{
-			SDL_FreeSurface(imgSurf);
+			SDL_DestroySurface(imgSurf);
 			throw e;
 		}
 
@@ -1013,9 +1013,9 @@ void Bitmap::drawText(const IntRect &rect, const char *str, int align)
 	SDL_Surface *txtSurf;
 
 	if (shState->rtData().config.solidFonts)
-		txtSurf = TTF_RenderUTF8_Solid(font, str, c);
+		txtSurf = TTF_RenderText_Solid(font, str, c);
 	else
-		txtSurf = TTF_RenderUTF8_Blended(font, str, c);
+		txtSurf = TTF_RenderText_Blended(font, str, c);
 
 	p->ensureFormat(txtSurf, SDL_PIXELFORMAT_ABGR8888);
 
@@ -1034,9 +1034,9 @@ void Bitmap::drawText(const IntRect &rect, const char *str, int align)
 		/* set the next font render to render the outline */
 		TTF_SetFontOutline(font, OUTLINE_SIZE);
 		if (shState->rtData().config.solidFonts)
-			outline = TTF_RenderUTF8_Solid(font, str, co);
+			outline = TTF_RenderText_Solid(font, str, co);
 		else
-			outline = TTF_RenderUTF8_Blended(font, str, co);
+			outline = TTF_RenderText_Blended(font, str, co);
 
 		p->ensureFormat(outline, SDL_PIXELFORMAT_ABGR8888);
 		SDL_Rect outRect = {OUTLINE_SIZE, OUTLINE_SIZE, txtSurf->w, txtSurf->h}; 
@@ -1107,7 +1107,7 @@ void Bitmap::drawText(const IntRect &rect, const char *str, int align)
 
 			/* If we have no intersection at all,
 			 * there's nothing to upload to begin with */
-			if (SDL_IntersectRect(&btmRect, &txtRect, &inters))
+			if (SDL_GetRectIntersection(&btmRect, &txtRect, &inters))
 			{
 				bool subImage = false;
 				int subSrcX = 0, subSrcY = 0;
@@ -1259,7 +1259,7 @@ IntRect Bitmap::textSize(const char *str)
 	str = fixed.c_str();
 
 	int w, h;
-	TTF_SizeUTF8(font, str, &w, &h);
+	TTF_GetStringSize(font, str, &w, &h);
 
 	/* If str is one character long, *endPtr == 0 */
 	const char *endPtr;
