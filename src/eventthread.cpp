@@ -21,14 +21,14 @@
 
 #include "eventthread.h"
 
-#include <SDL_events.h>
-#include <SDL_joystick.h>
-#include <SDL_gamecontroller.h>
-#include <SDL_messagebox.h>
-#include <SDL_timer.h>
-#include <SDL_thread.h>
-#include <SDL_touch.h>
-#include <SDL_rect.h>
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_joystick.h>
+#include <SDL3/SDL_gamecontroller.h>
+#include <SDL3/SDL_messagebox.h>
+#include <SDL3/SDL_timer.h>
+#include <SDL3/SDL_thread.h>
+#include <SDL3/SDL_touch.h>
+#include <SDL3/SDL_rect.h>
 
 #include <al.h>
 #include <alc.h>
@@ -101,8 +101,8 @@ static uint32_t usrIdStart;
 bool EventThread::allocUserEvents()
 {
 	usrIdStart = SDL_RegisterEvents(EVENT_COUNT);
-
-	if (usrIdStart == (uint32_t) -1)
+	// SDL_RegisterEvents() now returns 0 if it couldn't allocate any user events.
+	if (usrIdStart == (uint32_t) 0)
 		return false;
 
 	return true;
@@ -147,19 +147,19 @@ void EventThread::process(RGSSThreadData &rtData)
 
 	bool terminate = false;
 
-	std::map<int, SDL_GameController*> controllers;
+	std::map<int, SDL_Gamepad*> controllers;
 	std::map<int, SDL_Joystick*> joysticks;
 
-	for (int i = 0; i < SDL_NumJoysticks(); ++i) {
-		if (SDL_IsGameController(i)) {
+	for (int i = 0; i < SDL_GetJoysticks(NULL); ++i) {
+		if (SDL_IsGamepad(i)) {
 			//Load as game controller
-			SDL_GameController *gc = SDL_GameControllerOpen(i);
-			int id = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(gc));
+			SDL_Gamepad *gc = SDL_OpenGamepad(i);
+			int id = SDL_GetJoystickID(SDL_GetGamepadJoystick(gc));
 			controllers[id] = gc;
 		} else {
 			//Fall back to joystick
-			SDL_Joystick *js = SDL_JoystickOpen(i);
-			joysticks[SDL_JoystickInstanceID(js)] = js;
+			SDL_Joystick *js = SDL_OpenJoystick(i);
+			joysticks[SDL_GetJoystickID(js)] = js;
 		}
 	}
 
@@ -173,10 +173,10 @@ void EventThread::process(RGSSThreadData &rtData)
 	int i;
 
 	SDL_Joystick *js;
-	SDL_GameController *gc;
+	SDL_Gamepad *gc;
 	int id;
 	std::map<int, SDL_Joystick*>::iterator jsit;
-	std::map<int, SDL_GameController*>::iterator gcit;
+	std::map<int, SDL_Gamepad*>::iterator gcit;
 
 	SDL_GetWindowSize(win, &winW, &winH); // SDL_GL_GetDrawableSize(win, &winW, &winH);
 
@@ -206,16 +206,16 @@ void EventThread::process(RGSSThreadData &rtData)
 		/* Preselect and discard unwanted events here */
 		switch (event.type)
 		{
-		case SDL_MOUSEBUTTONDOWN :
-		case SDL_MOUSEBUTTONUP :
-		case SDL_MOUSEMOTION :
+		case SDL_EVENT_MOUSE_BUTTON_DOWN :
+		case SDL_EVENT_MOUSE_BUTTON_UP :
+		case SDL_EVENT_MOUSE_MOTION :
 			if (event.button.which == SDL_TOUCH_MOUSEID)
 				continue;
 			break;
 
-		case SDL_FINGERDOWN :
-		case SDL_FINGERUP :
-		case SDL_FINGERMOTION :
+		case SDL_EVENT_FINGER_DOWN :
+		case SDL_EVENT_FINGER_UP :
+		case SDL_EVENT_FINGER_MOTION :
 			if (event.tfinger.fingerId >= MAX_FINGERS)
 				continue;
 			break;
@@ -227,7 +227,8 @@ void EventThread::process(RGSSThreadData &rtData)
 		case SDL_WINDOWEVENT :
 			switch (event.window.event)
 			{
-			case SDL_WINDOWEVENT_SIZE_CHANGED :
+			//SDL_WINDOWEVENT_SIZE_CHANGED - handle the SDL_EVENT_WINDOW_RESIZED and SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED events instead
+			case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED :
 				winW = event.window.data1;
 				winH = event.window.data2;
 
@@ -237,21 +238,21 @@ void EventThread::process(RGSSThreadData &rtData)
 				resetInputStates();
 				break;
 
-			case SDL_WINDOWEVENT_ENTER :
+			case SDL_EVENT_WINDOW_MOUSE_ENTER :
 				cursorInWindow = true;
 				mouseState.inWindow = true;
 				updateCursorState(cursorInWindow && windowFocused && !sMenu, gameScreen);
 
 				break;
 
-			case SDL_WINDOWEVENT_LEAVE :
+			case SDL_EVENT_WINDOW_MOUSE_LEAVE :
 				cursorInWindow = false;
 				mouseState.inWindow = false;
 				updateCursorState(cursorInWindow && windowFocused && !sMenu, gameScreen);
 
 				break;
 
-			case SDL_WINDOWEVENT_CLOSE :
+			case SDL_EVENT_WINDOW_CLOSE_REQUESTED :
 				if (rtData.allowExit) {
 					terminate = true;
 				} else {
@@ -260,13 +261,13 @@ void EventThread::process(RGSSThreadData &rtData)
 
 				break;
 
-			case SDL_WINDOWEVENT_FOCUS_GAINED :
+			case SDL_EVENT_WINDOW_FOCUS_GAINED :
 				windowFocused = true;
 				updateCursorState(cursorInWindow && windowFocused && !sMenu, gameScreen);
 
 				break;
 
-			case SDL_WINDOWEVENT_FOCUS_LOST :
+			case SDL_EVENT_WINDOW_FOCUS_LOST :
 				windowFocused = false;
 				updateCursorState(cursorInWindow && windowFocused && !sMenu, gameScreen);
 				resetInputStates();
@@ -275,7 +276,7 @@ void EventThread::process(RGSSThreadData &rtData)
 			}
 
 			#ifdef __APPLE__
-				case SDL_WINDOWEVENT_MOVED:
+				case SDL_EVENT_WINDOW_MOVED:
 					if (shState != NULL && event.window.data1 && event.window.data2)
 						shState->oneshot().setWindowPos(event.window.data1, event.window.data2);
 					break;
@@ -283,7 +284,7 @@ void EventThread::process(RGSSThreadData &rtData)
 
 			break;
 
-		case SDL_QUIT :
+		case SDL_EVENT_QUIT :
 			if (rtData.allowExit) {
 				terminate = true;
 				Debug() << "EventThread termination requested";
@@ -293,11 +294,11 @@ void EventThread::process(RGSSThreadData &rtData)
 
 			break;
 
-		case SDL_TEXTINPUT:
+		case SDL_EVENT_TEXT_INPUT:
 			if (rtData.inputText.length() < (size_t)(rtData.inputTextLimit)) rtData.inputText += event.text.text;
 			break;
 
-		case SDL_KEYDOWN :
+		case SDL_EVENT_KEY_DOWN :
 			if (event.key.keysym.scancode == SDL_SCANCODE_F1)
 			{
 				if (!sMenu)
@@ -364,7 +365,7 @@ void EventThread::process(RGSSThreadData &rtData)
 			keyStates[event.key.keysym.scancode] = true;
 			break;
 
-		case SDL_KEYUP :
+		case SDL_EVENT_KEY_UP :
 			if (event.key.keysym.scancode == SDL_SCANCODE_F12)
 			{
 				if (!rtData.config.debugMode)
@@ -378,92 +379,92 @@ void EventThread::process(RGSSThreadData &rtData)
 			keyStates[event.key.keysym.scancode] = false;
 			break;
 
-		case SDL_CONTROLLERBUTTONDOWN:
+		case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
 			gcState.buttons[event.cbutton.button] = true;
 			break;
 
-		case SDL_CONTROLLERBUTTONUP:
+		case SDL_EVENT_GAMEPAD_BUTTON_UP:
 			gcState.buttons[event.cbutton.button] = false;
 			break;
 
-		case SDL_CONTROLLERAXISMOTION:
+		case SDL_EVENT_GAMEPAD_AXIS_MOTION:
 			gcState.axes[event.caxis.axis] = event.caxis.value;
 			break;
 
-		case SDL_CONTROLLERDEVICEADDED:
-			gc = SDL_GameControllerOpen(event.jdevice.which);
-			id = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(gc));
+		case SDL_EVENT_GAMEPAD_ADDED:
+			gc = SDL_OpenGamepad(event.jdevice.which);
+			id = SDL_GetJoystickID(SDL_GetGamepadJoystick(gc));
 			controllers[id] = gc;
 			break;
 
-		case SDL_CONTROLLERDEVICEREMOVED:
+		case SDL_EVENT_GAMEPAD_REMOVED:
 			gcit = controllers.find(event.jdevice.which);
-			SDL_GameControllerClose(gcit->second);
+			SDL_CloseGamepad(gcit->second);
 			controllers.erase(gcit);
 			break;
 
-		case SDL_JOYBUTTONDOWN :
+		case SDL_EVENT_JOYSTICK_BUTTON_DOWN :
 			if (joysticks.find(event.jbutton.which) != joysticks.end())
 				joyState.buttons[event.jbutton.button] = true;
 			break;
 
-		case SDL_JOYBUTTONUP :
+		case SDL_EVENT_JOYSTICK_BUTTON_UP :
 			if (joysticks.find(event.jbutton.which) != joysticks.end())
 				joyState.buttons[event.jbutton.button] = false;
 			break;
 
-		case SDL_JOYHATMOTION :
+		case SDL_EVENT_JOYSTICK_HAT_MOTION :
 			if (joysticks.find(event.jbutton.which) != joysticks.end())
 				joyState.hats[event.jhat.hat] = event.jhat.value;
 			break;
 
-		case SDL_JOYAXISMOTION :
+		case SDL_EVENT_JOYSTICK_AXIS_MOTION :
 			if (joysticks.find(event.jbutton.which) != joysticks.end())
 				joyState.axes[event.jaxis.axis] = event.jaxis.value;
 			break;
 
-		case SDL_JOYDEVICEADDED :
-			if (SDL_IsGameController(event.jdevice.which))
+		case SDL_EVENT_JOYSTICK_ADDED :
+			if (SDL_IsGamepad(event.jdevice.which))
 				break;
-			js = SDL_JoystickOpen(event.jdevice.which);
-			joysticks[SDL_JoystickInstanceID(js)] = js;
+			js = SDL_OpenJoystick(event.jdevice.which);
+			joysticks[SDL_GetJoystickID(js)] = js;
 			break;
 
-		case SDL_JOYDEVICEREMOVED :
+		case SDL_EVENT_JOYSTICK_REMOVED :
 			jsit = joysticks.find(event.jdevice.which);
 			if (jsit != joysticks.end()) {
-				SDL_JoystickClose(jsit->second);
+				SDL_CloseJoystick(jsit->second);
 				joysticks.erase(jsit);
 				resetInputStates();
 			}
 			break;
 
-		case SDL_MOUSEBUTTONDOWN :
+		case SDL_EVENT_MOUSE_BUTTON_DOWN :
 			mouseState.buttons[event.button.button] = true;
 			break;
 
-		case SDL_MOUSEBUTTONUP :
+		case SDL_EVENT_MOUSE_BUTTON_UP :
 			mouseState.buttons[event.button.button] = false;
 			break;
 
-		case SDL_MOUSEMOTION :
+		case SDL_EVENT_MOUSE_MOTION :
 			mouseState.x = event.motion.x;
 			mouseState.y = event.motion.y;
 			updateCursorState(cursorInWindow, gameScreen);
 			break;
 
-		case SDL_FINGERDOWN :
+		case SDL_EVENT_FINGER_DOWN :
 			i = event.tfinger.fingerId;
 			touchState.fingers[i].down = true;
 			/* falls through */
 
-		case SDL_FINGERMOTION :
+		case SDL_EVENT_FINGER_MOTION :
 			i = event.tfinger.fingerId;
 			touchState.fingers[i].x = event.tfinger.x * winW;
 			touchState.fingers[i].y = event.tfinger.y * winH;
 			break;
 
-		case SDL_FINGERUP :
+		case SDL_EVENT_FINGER_UP :
 			i = event.tfinger.fingerId;
 			memset(&touchState.fingers[i], 0, sizeof(touchState.fingers[0]));
 			break;
@@ -533,9 +534,9 @@ void EventThread::process(RGSSThreadData &rtData)
 	rtData.syncPoint.resumeThreads();
 
 	for (gcit = controllers.begin(); gcit != controllers.end(); ++gcit)
-		SDL_GameControllerClose(gcit->second);
+		SDL_CloseGamepad(gcit->second);
 	for (jsit = joysticks.begin(); jsit != joysticks.end(); ++jsit)
-		SDL_JoystickClose(jsit->second);
+		SDL_CloseJoystick(jsit->second);
 
 	delete sMenu;
 }
@@ -546,8 +547,8 @@ int EventThread::eventFilter(void *data, SDL_Event *event)
 
 	switch (event->type)
 	{
-	case SDL_APP_WILLENTERBACKGROUND :
-		Debug() << "SDL_APP_WILLENTERBACKGROUND";
+	case SDL_EVENT_WILL_ENTER_BACKGROUND :
+		Debug() << "SDL_EVENT_WILL_ENTER_BACKGROUND";
 
 		if (HAVE_ALC_DEVICE_PAUSE)
 			alc.DevicePause(rtData.alcDev);
@@ -556,16 +557,16 @@ int EventThread::eventFilter(void *data, SDL_Event *event)
 
 		return 0;
 
-	case SDL_APP_DIDENTERBACKGROUND :
-		Debug() << "SDL_APP_DIDENTERBACKGROUND";
+	case SDL_EVENT_DID_ENTER_BACKGROUND :
+		Debug() << "SDL_EVENT_DID_ENTER_BACKGROUND";
 		return 0;
 
-	case SDL_APP_WILLENTERFOREGROUND :
-		Debug() << "SDL_APP_WILLENTERFOREGROUND";
+	case SDL_EVENT_WILL_ENTER_FOREGROUND :
+		Debug() << "SDL_EVENT_WILL_ENTER_FOREGROUND";
 		return 0;
 
-	case SDL_APP_DIDENTERFOREGROUND :
-		Debug() << "SDL_APP_DIDENTERFOREGROUND";
+	case SDL_EVENT_DID_ENTER_FOREGROUND :
+		Debug() << "SDL_EVENT_DID_ENTER_FOREGROUND";
 
 		if (HAVE_ALC_DEVICE_PAUSE)
 			alc.DeviceResume(rtData.alcDev);
@@ -574,17 +575,17 @@ int EventThread::eventFilter(void *data, SDL_Event *event)
 
 		return 0;
 
-	case SDL_APP_TERMINATING :
-		Debug() << "SDL_APP_TERMINATING";
+	case SDL_EVENT_TERMINATING :
+		Debug() << "SDL_EVENT_TERMINATING";
 		return 0;
 
-	case SDL_APP_LOWMEMORY :
-		Debug() << "SDL_APP_LOWMEMORY";
+	case SDL_EVENT_LOW_MEMORY :
+		Debug() << "SDL_EVENT_LOW_MEMORY";
 		return 0;
 
 	/* Workaround for Windows pausing on drag */
 	case SDL_WINDOWEVENT:
-		if (event->window.event == SDL_WINDOWEVENT_MOVED)
+		if (event->window.event == SDL_EVENT_WINDOW_MOVED)
 		{
 			if (shState != NULL && shState->rgssVersion > 0)
 			{
@@ -599,8 +600,7 @@ int EventThread::eventFilter(void *data, SDL_Event *event)
 	return 1;
 }
 
-void EventThread::cleanup()
-{
+void EventThread::cleanup(){
 	SDL_Event event;
 
 	while (SDL_PollEvent(&event))
@@ -608,8 +608,7 @@ void EventThread::cleanup()
 			free(event.user.data1);
 }
 
-void EventThread::resetInputStates()
-{
+void EventThread::resetInputStates(){
 	memset(&keyStates, 0, sizeof(keyStates));
 	memset(&gcState, 0, sizeof(gcState));
 	memset(&joyState, 0, sizeof(joyState));
@@ -617,23 +616,19 @@ void EventThread::resetInputStates()
 	memset(&touchState, 0, sizeof(touchState));
 }
 
-void EventThread::setFullscreen(SDL_Window *win, bool mode)
-{
-	SDL_SetWindowFullscreen
-	        (win, mode ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+void EventThread::setFullscreen(SDL_Window *win, bool mode){
+	SDL_SetWindowFullscreen(win, mode ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
 	fullscreen = mode;
 }
 
-void EventThread::updateCursorState(bool inWindow,
-                                    const SDL_Rect &screen)
-{
+void EventThread::updateCursorState(bool inWindow, const SDL_Rect &screen){
 	SDL_Point pos = { mouseState.x, mouseState.y };
 	bool inScreen = inWindow && SDL_PointInRect(&pos, &screen);
 
 	if (inScreen)
-		SDL_ShowCursor(showCursor ? SDL_TRUE : SDL_FALSE);
+		SDL_ShowCursor();
 	else
-		SDL_ShowCursor(SDL_TRUE);
+		SDL_HideCursor()
 }
 
 void EventThread::requestTerminate()
@@ -818,9 +813,9 @@ void SyncPoint::Util::unlock(bool multi)
 	locked.clear();
 
 	if (multi)
-		SDL_CondBroadcast(cond);
+		SDL_BroadcastCondition(cond);
 	else
-		SDL_CondSignal(cond);
+		SDL_SignalCondition(cond);
 }
 
 void SyncPoint::Util::waitForUnlock()
