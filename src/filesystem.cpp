@@ -201,7 +201,7 @@ static size_t SDL_RWopsRead(void *userdata, void *ptr, size_t size, SDL_IOStatus
 	else if (result == -1)
 		*status = SDL_IOStatus::SDL_IO_STATUS_ERROR;
 
-	return (result != -1) ? (result / size) : 0;
+	return (result != -1) ? (result) : 0;
 }
 
 static size_t SDL_RWopsWrite(void *userdata, const void *ptr, size_t size, SDL_IOStatus *status)
@@ -216,7 +216,7 @@ static size_t SDL_RWopsWrite(void *userdata, const void *ptr, size_t size, SDL_I
 	if (result == -1)
 		*status = SDL_IOStatus::SDL_IO_STATUS_ERROR;
 
-	return (result != -1) ? (result / size) : 0;
+	return (result != -1) ? (result) : 0;
 }
 
 static bool SDL_RWopsClose(void *userdata)
