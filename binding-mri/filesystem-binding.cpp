@@ -40,11 +40,11 @@ DEF_TYPE_CUSTOMFREE(FileInt, fileIntFreeInstance);
 static VALUE
 fileIntForPath(const char *path, bool rubyExc)
 {
-	SDL_IOStream *ops;
+	SDL_IOStream* ops;
 
 	try
 	{
-		shState->fileSystem().openReadRaw(*ops, path);
+		shState->fileSystem().openReadRaw(ops*, path);
 	}
 	catch (const Exception &e)
 	{

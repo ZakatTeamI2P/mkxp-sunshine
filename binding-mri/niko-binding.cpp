@@ -99,9 +99,9 @@ RB_METHOD(nikoPrepare)
 	RB_UNUSED_PARAM;
 
 	// Prime native window info
-	syswm::SDL_SysWMinfo syswindow;
-	SDL_VERSION(&syswindow.version);
-	SDL_GetWindowWMInfo(shState->rtData().window, &syswindow);
+	//syswm::SDL_SysWMinfo syswindow;
+	//SDL_VERSION(&syswindow.version);
+	//SDL_GetWindowWMInfo(shState->rtData().window, &syswindow);
 
 #ifdef LINUX
 	char path[PATH_MAX];
@@ -133,9 +133,9 @@ RB_METHOD(nikoStart)
 	RB_UNUSED_PARAM;
 
 	// Prime native window info
-	syswm::SDL_SysWMinfo syswindow;
-	SDL_VERSION(&syswindow.version);
-	SDL_GetWindowWMInfo(shState->rtData().window, &syswindow);
+	//syswm::SDL_SysWMinfo syswindow;
+	//SDL_VERSION(&syswindow.version);
+	//SDL_GetWindowWMInfo(shState->rtData().window, &syswindow);
 
 #ifdef _WIN32
 	// Calculate where to stick the window

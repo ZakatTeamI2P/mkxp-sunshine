@@ -79,9 +79,7 @@ raiseRbExc(const Exception &exc);
 #endif
 
 #define DEF_TYPE_CUSTOMNAME_AND_FREE(Klass, Name, Free) \
-	rb_data_type_t Klass##Type = { \
-		Name, { 0, Free, 0, { 0, 0 } }, 0, 0, DEF_TYPE_FLAGS \
-	}
+	rb_data_type_t Klass##Type = { Name, { 0, Free, 0, { 0, 0 } }, 0, 0, (void*)DEF_TYPE_FLAGS }
 
 #define DEF_TYPE_CUSTOMFREE(Klass, Free) \
 	DEF_TYPE_CUSTOMNAME_AND_FREE(Klass, #Klass, Free)
