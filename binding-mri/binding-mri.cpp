@@ -587,6 +587,8 @@ static void mriBindingExecute()
 	ruby_sysinit(&argc, &argv);
 
 	ruby_setup();
+	char options_argv1[] = "oneshot", options_argv2[] = "-e", options_argv3[] = "";
+	char* options_argv[] = {options_argv1, options_argv2, options_argv3, NULL};
 	rb_enc_set_default_external(rb_enc_from_encoding(rb_utf8_encoding()));
 
 	Config &conf = shState->rtData().config;
