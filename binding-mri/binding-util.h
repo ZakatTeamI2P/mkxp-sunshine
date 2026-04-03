@@ -290,13 +290,11 @@ int rb_get_args(int argc, VALUE *argv, const char *format, ...);
 
 typedef VALUE (*RubyMethod)(int argc, VALUE *argv, VALUE self);
 
-static inline void
-_rb_define_method(VALUE klass, const char *name, RubyMethod func){
+static inline void _rb_define_method(VALUE klass, const char *name, RubyMethod func){
 	rb_define_method(klass, name, RUBY_METHOD_FUNC(func), -1);
 }
 
-static inline void
-rb_define_class_method(VALUE klass, const char *name, RubyMethod func){
+static inline void rb_define_class_method(VALUE klass, const char *name, RubyMethod func){
 	rb_define_singleton_method(klass, name, RUBY_METHOD_FUNC(func), -1);
 }
 

@@ -28,8 +28,7 @@
 #include "ruby/encoding.h"
 #include "ruby/intern.h"
 
-static void
-fileIntFreeInstance(void *inst){
+static void fileIntFreeInstance(void *inst){
 	SDL_IOStream *ops = static_cast<SDL_IOStream*>(inst);
 
 	SDL_CloseIO(ops);
@@ -184,23 +183,26 @@ static VALUE customProc(VALUE arg, VALUE proc)
 	return obj;
 }
 
-RB_METHOD(_marshalLoad)
-{
+RB_METHOD(_marshalLoad){
+	printf("test\n");
 	RB_UNUSED_PARAM;
-
+	printf("test2\n");
 	VALUE port, proc = Qnil;
-
-	rb_get_args(argc, argv, "o|o", &port, &proc RB_ARG_END);
-
+	printf("test3\n");
+	rb_scan_args(argc, argv, "01", &port, &proc);
+	//rb_get_args(argc, argv, "o|o", &port, &proc RB_ARG_END);
+	printf("test4\n");
 	VALUE utf8Proc;
 	if (NIL_P(proc))
 		utf8Proc = rb_proc_new(RUBY_METHOD_FUNC(stringForceUTF8), Qnil);
 	else
 		utf8Proc = rb_proc_new(RUBY_METHOD_FUNC(customProc), proc);
-
+	printf("test5\n");
 	VALUE marsh = rb_const_get(rb_cObject, rb_intern("Marshal"));
-
+	//if (!rb_obj_is_kind_of(marsh, rb_cModule)) rb_raise(rb_eRuntimeError, "Marshal not found");
+	printf("test6\n");
 	VALUE v[] = { port, utf8Proc };
+	printf("test7\n");
 	return rb_funcall2(marsh, rb_intern("_mkxp_load_alias"), ARRAY_SIZE(v), v);
 }
 
@@ -221,7 +223,11 @@ fileIntBindingInit()
 	/* We overload the built-in 'Marshal::load()' function to silently
 	 * insert our utf8proc that ensures all read strings will be
 	 * UTF-8 encoded */
+	printf("test8\n");
 	VALUE marsh = rb_const_get(rb_cObject, rb_intern("Marshal"));
+	printf("test9\n");
 	rb_define_alias(rb_singleton_class(marsh), "_mkxp_load_alias", "load");
+	printf("test10\n");
 	_rb_define_module_function(marsh, "load", _marshalLoad);
+	printf("test11\n");
 }

@@ -17,3 +17,10 @@ cmake -S . -B build
 cd build
 make -jn 
 n - count of threads for compilation
+
+#TODOs:
+*Port to SDL3,Modern ruby and other
+*Extend API with usefull thinks idk...
+*Fix bugs
+*Upgrade linux support
+*MAKE THIS WORK 
