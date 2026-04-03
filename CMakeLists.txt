@@ -11,7 +11,11 @@ option(DEBUG "Debug mode" OFF)
 ## Misc setup ##
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(DEBUG_C_FLAGS "-g -O0 -fno-omit-frame-pointer")
+set(DEBUG_CXX_FLAGS "-g -O0 -fno-omit-frame-pointer -std=c++17")
 
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${DEBUG_C_FLAGS}")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${DEBUG_CXX_FLAGS}")
 ## Setup main source ##
 
 # oldimpls dir stuff
@@ -306,7 +310,7 @@ find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(PhysFS CONFIG)
 find_path(PIXMAN_INCLUDE_DIR NAMES pixman.h PATH_SUFFIXES pixman-1)
 find_library(PIXMAN_LIBRARY NAMES pixman-1 pixman-1_static pixman-1_staticd)
-find_package(Ruby REQUIRED)
+find_package(Ruby 3.3 REQUIRED)
 pkg_check_modules(SIGC2 REQUIRED sigc++-2.0)
 pkg_check_modules(VORBISFILE REQUIRED vorbisfile)
 find_package_handle_standard_args(pixman-1 DEFAULT_MSG PIXMAN_LIBRARY PIXMAN_INCLUDE_DIR)
